@@ -233,8 +233,8 @@ export const CookieBannerNew = ({cookieGroups, cookieSets, cookieStates }) => {
           </div>
           <div className="banner-more-options">
             <div className="banner-button-container banner-small-container">
-              <button className="left" onClick={() => {window.showImpressum()}}>Impressum</button>
-              <button className="right" onClick={() => {window.showAGB()}}>Datenschutz</button>
+              <button className="left link-button" onClick={() => {window.showImpressum()}}>Impressum</button>
+              <button className="right link-button" onClick={() => {window.showAGB()}}>Datenschutz</button>
             </div>
           </div>
         </div>
