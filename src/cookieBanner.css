@@ -148,3 +148,21 @@ html[xmlns] .clearfix {
     }
 
 }
+
+#cookie-root .overlay {
+  z-index: 9;
+}
+
+.cookieBannerHidden {
+  position: absolute;
+  padding: 5px;
+  width: 60px;
+  height: 60px;
+  border-radius: 80px;
+  background-color: white;
+  background-image: url("./assets/cookie.svg");
+  background-repeat: no-repeat;
+  background-size: contain;
+  left: 0;
+  bottom: 0;
+}
