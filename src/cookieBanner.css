@@ -1,0 +1,150 @@
+.banner-img-container {
+    width: 100%;
+    height: fit-content;
+    display: flex;
+    justify-content: center;
+    flex-direction: row;
+    position: relative;
+}
+
+.banner-body h1 {
+    width: 100%;
+    padding-bottom: 10px;
+    text-align: center;
+}
+
+.banner-body {
+
+}
+
+.banner-dynamic-break {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+}
+
+.banner-img-container img {
+    content: url("./assets/cookieIcon.svg");
+    width: 100px;
+    height: 100px;
+}
+
+.banner-button-container {
+    width: 100%;
+}
+
+.banner-small-container {
+    width: 60%;
+}
+
+.clearfix:after {
+    content: ".";
+    display: block;
+    clear: both;
+    visibility: hidden;
+    line-height: 0;
+    height: 0;
+}
+
+.clearfix {
+    display: inline-block;
+}
+
+html[xmlns] .clearfix {
+    display: block;
+}
+
+* html .clearfix {
+    height: 1%;
+}
+
+.banner-button-container .left {
+    position: relative;
+    float: left;
+}
+
+.banner-button-container .right {
+    position: relative;
+    float: right;
+}
+
+.banner-more-options {
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+}
+
+.banner-more-options a {
+    color: blue;
+    font-weight: bold;
+}
+
+.banner-body p {
+    padding-bottom: 10px;
+}
+
+.banner-body ul {
+    list-style-type: disc; 
+    list-style-position: inside;
+}
+
+
+@media screen and (min-width: 685px) {
+    .banner-img-container {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        flex-grow: 1;
+        height: 100%;
+        width: 300px;
+    }
+    .banner-body {
+        flex-grow: 1;
+    }
+    .banner-img-container img {
+        width: 300px;
+        height: 300px;
+    }
+
+    .banner-dynamic-break {
+        display: flex;
+        flex-direction: row;
+        height: fit-content;
+    }
+
+    .banner-body {
+        padding-left: 10px;
+        padding-right: 10px;
+    }
+
+    .banner-body h1 {
+        width: 100%;
+        text-align: left;
+    }
+    .banner-more-options {
+        width: auto;
+        padding-left: 10px;
+    }
+
+    .banner-extra-options-dyn-container {
+        display: flex;
+        flex-direction: row;
+    }
+
+    .banner-small-container {
+        width: auto;
+        display: flex;
+        flex-direction: row;
+    }
+
+    .banner-small-container .right{
+        padding-left: 10px;
+    }
+
+    .banner-spacer {
+        flex-grow: 1;
+    }
+
+}
