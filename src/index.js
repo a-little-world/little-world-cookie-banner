@@ -5,10 +5,18 @@ import CookieBanner from './App';
 import reportWebVitals from './reportWebVitals';
 
 const LOCAL_DEV = true; // TODO should also be moved to some central env file
+
 const renderApp = () => {
-  const root = ReactDOM.createRoot(document.getElementById('cookie-root'));
+  const host = document.querySelector('#shadow-root');
+  const shadow = host.attachShadow({ mode: 'open' });
+  const para = document.createElement('div');
+  shadow.appendChild(para);
+  para.id = "cookie-root";
+
+  const root = ReactDOM.createRoot(para);
   root.render(
     <React.StrictMode>
+      <CookieBanner></CookieBanner>
     </React.StrictMode>,
   );
 };
