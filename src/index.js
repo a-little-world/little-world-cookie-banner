@@ -4,7 +4,7 @@ import CookieBanner from './App';
 import reportWebVitals from './reportWebVitals';
 import { DEVELOPMENT, LOCAL_DEV } from "./ENVIRONMENT"
 
-const renderApp = (cookieGroupsJSON, cookieSetsJSON, cookieStateDictJSON) => {
+const renderApp = (cookieGroupsJSON, cookieSetsJSON, cookieStateDictJSON, toImpressumFunc, toPrivacyFunc) => {
   const host = document.querySelector('#shadow-root');
   const shadow = host.attachShadow({ mode: 'open' });
   const para = document.createElement('div');
@@ -14,7 +14,7 @@ const renderApp = (cookieGroupsJSON, cookieSetsJSON, cookieStateDictJSON) => {
   const root = ReactDOM.createRoot(para);
   root.render(
     <React.StrictMode>
-      <CookieBanner cookieGroups={JSON.parse(cookieGroupsJSON)} cookieSets={JSON.parse(cookieSetsJSON)} cookieStates={cookieStateDictJSON} ></CookieBanner>
+      <CookieBanner cookieGroups={JSON.parse(cookieGroupsJSON)} cookieSets={JSON.parse(cookieSetsJSON)} cookieStates={cookieStateDictJSON} toImpressumFunc={toImpressumFunc} toPrivacyFunc={toPrivacyFunc}></CookieBanner>
     </React.StrictMode>,
   );
 };
