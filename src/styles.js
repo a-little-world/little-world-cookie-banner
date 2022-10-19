@@ -25,7 +25,6 @@ export const cookieBannerCSS = `
 }
 
 .banner-img-container img {
-    content: url("./assets/cookieIcon.svg");
     width: 100px;
     height: 100px;
 }
@@ -175,7 +174,6 @@ background-color: transparent; /* Green */
   height: 60px;
   border-radius: 80px;
   background-color: transparent;
-  background-image: url("./assets/cookie.svg");
   background-repeat: no-repeat;
   background-size: contain;
   left: 0;
