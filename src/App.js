@@ -8,7 +8,7 @@ import $ from "jquery";
 import { BACKEND_URL, STORYBOOK } from "./ENVIRONMENT";
 import { OverlayMacro } from "./overlay";
 
-function CookieBanner({cookieGroups, cookieSets, cookieStates }) {
+function CookieBanner({cookieGroups, cookieSets, cookieStates, toImpressumFunc, toPrivacyFunc }) {
   const styles = indexCSS + "\n" + cookieBannerCSS + "\n" + overlayCSS; // All merged styles ( neeed to be included like this since we are using a shadow dom )
 
   const showBannerCookieName = "cookieSelectionDone";
@@ -117,8 +117,8 @@ function CookieBanner({cookieGroups, cookieSets, cookieStates }) {
           </div>
           <div className="banner-more-options">
             <div className="banner-button-container banner-small-container">
-              <button className="left link-button" onClick={() => {window.showImpressum()}}>Impressum</button>
-              <button className="right link-button" onClick={() => {window.showAGB()}}>Datenschutz</button>
+              <button className="left link-button" onClick={() => {toImpressumFunc()}}>Impressum</button>
+              <button className="right link-button" onClick={() => {toPrivacyFunc()}}>Datenschutz</button>
             </div>
           </div>
         </div>
