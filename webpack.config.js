@@ -19,7 +19,7 @@ var config = function(env) {
     return {
     context: __dirname,
     entry: {
-        'staticfiles': './src/index.tsx',
+        'staticfiles': './src/index.ts',
     },
 
     resolve: {
