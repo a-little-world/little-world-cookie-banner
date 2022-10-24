@@ -150,7 +150,7 @@ html[xmlns] .clearfix {
 }
 
 #cookie-root .overlay {
-  z-index: 9;
+  z-index: 99;
 }
 
 #cookie-root button {
