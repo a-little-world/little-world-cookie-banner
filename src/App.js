@@ -70,22 +70,30 @@ function CookieBanner({
         }
       });
     }
-    $.ajax({
-      type: 'POST',
-      url: `${BACKEND_URL}/cookies/${
-        isAccepted ? 'accept' : 'decline'
-      }/${cookieVarName}/`,
-      headers: {
-        'X-CSRFToken': Cookies.get('csrftoken'),
-      },
-      data: {},
-      success: () => {
-        console.log('Operation suceeded');
-      },
-      error: () => {
-        console.log('Operation failed');
-      },
-    });
+  };
+  var currentConsentState = {};
+
+  const loadCurrentConsents = () => {
+    const cookieName = 'cookie_consent';
+    return Cookies.get(cookieName, {}); //The current acceptance state
+  };
+
+  const addScriptBySrc = (scriptSrc, id) => {
+    const script = document.createElement('script');
+    document.head.appendChild(script);
+    script.async = true;
+    script.id = id;
+    script.src = scriptSrc;
+  };
+
+  const addScriptFromString = (scriptString, id) => {
+    const script = document.createElement('script');
+    document.head.appendChild(script);
+    var inlineScript = document.createTextNode(scriptString);
+    script.appendChild(inlineScript);
+    document.head.appendChild(script);
+    script.async = true;
+    script.id = id;
   };
 
   const declineAllNonEssentialCookies = () => {
