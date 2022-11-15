@@ -7,6 +7,10 @@ import { useTranslation, initReactI18next } from 'react-i18next';
 import $ from 'jquery';
 import { BACKEND_URL, STORYBOOK } from './ENVIRONMENT';
 import { OverlayMacro } from './overlay';
+import {
+  addScriptSrcToDom,
+  addScriptToDom,
+} from './cookieTagInsertionLib';
 
 function CookieBanner({
   cookieGroups,
@@ -14,7 +18,6 @@ function CookieBanner({
   cookieStates,
   toImpressumFunc,
   toPrivacyFunc,
-  cookieScriptMap = {},
 }) {
   const styles =
     indexCSS + '\n' + cookieBannerCSS + '\n' + overlayCSS; // All merged styles ( neeed to be included like this since we are using a shadow dom )
@@ -31,26 +34,44 @@ function CookieBanner({
       (cookie) => cookie.fields.cookiegroup === group.pk
     );
   };
-  var currentConsentState = {};
+  console.log(cookieGroups, cookieSets, cookieStates);
 
   const cookieAcceptanceUpdate = (isAccepted, cookieVarName) => {
-    $.ajax({
-      type: 'POST',
-      url: `${BACKEND_URL}/cookies/${
-        isAccepted ? 'accept' : 'decline'
-      }/${cookieVarName}/`,
-      headers: {
-        'X-CSRFToken': Cookies.get('csrftoken'),
-      },
-      data: {},
-      success: () => {
-        console.log('Operation suceeded');
-      },
-      error: () => {
-        console.log('Operation failed');
-      },
-    });
+    if (isAccepted) {
+      console.log('ACCEPTED: ', cookieVarName);
+      const group_id = cookieGroups.filter(
+        (g) => g.fields.varname === cookieVarName
+      )[0].pk;
+      console.log('Group id', group_id);
+
+      cookieSets.forEach((cookie) => {
+        if (cookie.fields.cookiegroup === group_id) {
+          console.log('Means you accepted', cookie);
+          cookie.fields.include_srcs.forEach((s) => {
+            console.log('Addming', s);
+            addScriptSrcToDom(
+              s,
+              'src-cookie-' +
+                cookie.pk.toString() +
+                '-group-' +
+                group_id.toString()
+            );
+          });
+          cookie.fields.include_scripts.forEach((s) => {
+            console.log('Addming', s);
+            addScriptToDom(
+              s,
+              'script-cookie-' +
+                cookie.pk.toString() +
+                '-group-' +
+                group_id.toString()
+            );
+          });
+        }
+      });
+    }
   };
+  var currentConsentState = {};
 
   const loadCurrentConsents = () => {
     const cookieName = 'cookie_consent';
@@ -84,18 +105,6 @@ function CookieBanner({
     });
   };
 
-  const addAllOfCookieGroup = (groupname) => {
-    console.log('adding all script of ', groupname);
-    if (groupname in cookieScriptMap) {
-      cookieScriptMap[groupname].src.forEach((src, i) => {
-        addScriptBySrc(src, groupname + '-' + i);
-      });
-      cookieScriptMap[groupname].codes.forEach((code, i) => {
-        addScriptFromString(code, groupname + '-' + i);
-      });
-    }
-  };
-
   const acceptAllNonEssentialCookies = () => {
     // Declines all cookies that are not essential
     cookieGroups.forEach((e) => {
@@ -103,27 +112,7 @@ function CookieBanner({
       if (!e.fields.is_required) {
         cookieAcceptanceUpdate(true, e.fields.varname);
       }
-      console.log('varname', e.fields.varname);
-      if (e.fields.varname in cookieScriptMap) {
-        console.log('Found existing tag');
-        console.log('Adding: ', cookieScriptMap[e.fields.varname]);
-        addAllOfCookieGroup(e.fields.varname);
-      }
-      currentConsentState[e.fields.varname] = '1';
     });
-    /*
-    TODO set the cookies in the browser if it's not done by request
-    Cookies.set(
-      'cookie_consent',
-      Object.entries(currentConsentState)
-        .map(
-          ([k, v]) =>
-            `${encodeURIComponent(k)}=${encodeURIComponent(v)}`
-        )
-        .join('&')
-        .toString()
-    );
-    */
   };
 
   const onExit = () => {
@@ -140,33 +129,6 @@ function CookieBanner({
   const clickSmallCookie = () => {
     setShow(true);
   };
-
-  useEffect(() => {
-    console.log(
-      'Banner rendered',
-      cookieGroups,
-      cookieSets,
-      cookieStates
-    );
-    console.log(cookieStates);
-    currentConsentState = Object.assign(
-      {},
-      loadCurrentConsents(),
-      cookieSets
-    );
-
-    cookieGroups.forEach((e) => {
-      if (e.fields.varname in currentConsentState) {
-        if (currentConsentState[e.fields.varname] === '1') {
-          addAllOfCookieGroup(e.fields.varname);
-        }
-      } else {
-        // Then add all scripts of that kind regardless
-        addAllOfCookieGroup(e.fields.varname);
-      }
-    });
-    Cookies.set('cookie_consent', currentConsentState);
-  });
 
   return (
     <div id="reset-this-root" className="reset-this">
