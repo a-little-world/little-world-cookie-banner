@@ -10,6 +10,7 @@ import { OverlayMacro } from './overlay';
 import {
   addScriptSrcToDom,
   addScriptToDom,
+  acceptAndInjectScripts,
 } from './cookieTagInsertionLib';
 
 function CookieBanner({
@@ -25,6 +26,7 @@ function CookieBanner({
   const showBannerCookieName = 'cookieSelectionDone';
   const shouldBannerBeShown = () => {
     const cookieValue = Cookies.get(showBannerCookieName);
+    console.log('current show state', cookieValue);
     return cookieValue === undefined ? true : false;
   };
   const [show, setShow] = useState(shouldBannerBeShown());
@@ -36,46 +38,57 @@ function CookieBanner({
   };
   console.log(cookieGroups, cookieSets, cookieStates);
 
+  const statesToString = (states) => {
+    const out = [];
+    Object.keys(states).forEach((k) => {
+      out.push(k.toString() + '=' + states[k].toString());
+    });
+    return out.join('|');
+  };
+
   const cookieAcceptanceUpdate = (isAccepted, cookieVarName) => {
+    $.ajax({
+      type: 'POST',
+      url: `${BACKEND_URL}/cookies/${
+        isAccepted ? 'accept' : 'decline'
+      }/${cookieVarName}/`,
+      headers: {
+        'X-CSRFToken': Cookies.get('csrftoken'),
+      },
+      data: {},
+      success: () => {
+        console.log('Operation suceeded');
+      },
+      error: () => {
+        console.log('Operation failed');
+      },
+    });
+    const group = cookieGroups.filter(
+      (g) => g.fields.varname === cookieVarName
+    )[0];
+
+    const group_id = group.pk;
+
+    cookieStates[cookieVarName] = isAccepted
+      ? group.fields.created
+      : '-1';
+
+    Cookies.remove('cookie_consent');
+    Cookies.set('cookie_consent', statesToString(cookieStates));
+
+    console.log('Updated cookie states', cookieStates);
+
     if (isAccepted) {
       console.log('ACCEPTED: ', cookieVarName);
-      const group_id = cookieGroups.filter(
-        (g) => g.fields.varname === cookieVarName
-      )[0].pk;
       console.log('Group id', group_id);
-
-      cookieSets.forEach((cookie) => {
-        if (cookie.fields.cookiegroup === group_id) {
-          console.log('Means you accepted', cookie);
-          cookie.fields.include_srcs.forEach((s) => {
-            console.log('Addming', s);
-            addScriptSrcToDom(
-              s,
-              'src-cookie-' +
-                cookie.pk.toString() +
-                '-group-' +
-                group_id.toString()
-            );
-          });
-          cookie.fields.include_scripts.forEach((s) => {
-            console.log('Addming', s);
-            addScriptToDom(
-              s,
-              'script-cookie-' +
-                cookie.pk.toString() +
-                '-group-' +
-                group_id.toString()
-            );
-          });
-        }
-      });
+      acceptAndInjectScripts(group_id, cookieSets);
     }
   };
   var currentConsentState = {};
 
   const loadCurrentConsents = () => {
     const cookieName = 'cookie_consent';
-    return Cookies.get(cookieName, {}); //The current acceptance state
+    return Cookies.get(cookieName, ''); //The current acceptance state
   };
 
   const addScriptBySrc = (scriptSrc, id) => {
@@ -129,6 +142,27 @@ function CookieBanner({
   const clickSmallCookie = () => {
     setShow(true);
   };
+
+  useEffect(() => {
+    console.log('STARUP', Cookies.get('cookieSelectionDone'));
+    const current_accept_state = Cookies.get('cookie_consent') || '';
+    console.log('current acceptance', current_accept_state);
+    if (!shouldBannerBeShown()) {
+      // Then we might have to load in script that that category wants
+      Object.keys(cookieStates).forEach((set) => {
+        if (cookieStates[set] !== '-1') {
+          console.log('Found existing cookie to be accepted', set);
+          const group = cookieGroups.filter(
+            (g) => g.fields.varname === set
+          )[0];
+
+          const group_id = group.pk;
+          console.log('belonging to group', group, 'adding...');
+          acceptAndInjectScripts(group_id, cookieSets);
+        }
+      });
+    }
+  });
 
   return (
     <div id="reset-this-root" className="reset-this">

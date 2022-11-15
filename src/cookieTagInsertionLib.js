@@ -15,3 +15,36 @@ export const addScriptToDom = (scriptString, id) => {
   script.id = id;
   document.head.appendChild(script);
 };
+
+export const acceptAndInjectScripts = (cookieGroup, cookieSets) => {
+  /**
+   * This will load all script source ore tags for a specific cookieGroup
+   * It will also check if the script id are present already and in that case would not add them again
+   */
+  cookieSets.forEach((cookie) => {
+    if (cookie.fields.cookiegroup === cookieGroup) {
+      console.log('Means you accepted', cookie);
+      cookie.fields.include_srcs.forEach((s) => {
+        console.log('Addming', s);
+        const setId =
+          'src-cookie-' +
+          cookie.pk.toString() +
+          '-group-' +
+          cookieGroup.toString();
+        if (!document.getElementById(setId))
+          addScriptSrcToDom(s, setId);
+        else console.log('Element already present' + setId);
+      });
+      cookie.fields.include_scripts.forEach((s) => {
+        console.log('Addming', s);
+        const setId =
+          'script-cookie-' +
+          cookie.pk.toString() +
+          '-group-' +
+          cookieGroup.toString();
+        if (!document.getElementById(setId)) addScriptToDom(s, setId);
+        else console.log('Element already present' + setId);
+      });
+    }
+  });
+};
