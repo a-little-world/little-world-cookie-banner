@@ -74,7 +74,9 @@ function CookieBanner({
       : '-1';
 
     Cookies.remove('cookie_consent');
-    Cookies.set('cookie_consent', statesToString(cookieStates));
+    const cookieString = statesToString(cookieStates);
+    console.log('Writing cookie string', cookieString);
+    Cookies.set('cookie_consent', cookieString);
 
     console.log('Updated cookie states', cookieStates);
 
@@ -146,8 +148,32 @@ function CookieBanner({
   useEffect(() => {
     console.log('STARUP', Cookies.get('cookieSelectionDone'));
     const current_accept_state = Cookies.get('cookie_consent') || '';
-    console.log('current acceptance', current_accept_state);
     if (!shouldBannerBeShown()) {
+      if (cookieStates === null) {
+        //Means we should determine the state our selfs
+        console.log('Cookie state null was passsed');
+        const current_accept_state =
+          Cookies.get('cookie_consent') || '';
+        console.log('current acceptance', current_accept_state);
+        if (current_accept_state === '') {
+          cookieStates = {};
+          console.log('Set empty state dict');
+        } else {
+          console.log(
+            'Trying to self determine state',
+            current_accept_state.split('|')
+          );
+          //cookieStages = current_accept_state.split('|');
+
+          cookieStates = {};
+          current_accept_state.split('|').forEach((e) => {
+            const keys = e.split('=');
+            console.log(keys);
+            cookieStates[keys[0]] = keys[1];
+          });
+          console.log('Determined', cookieStates);
+        }
+      }
       // Then we might have to load in script that that category wants
       Object.keys(cookieStates).forEach((set) => {
         if (cookieStates[set] !== '-1') {
