@@ -68,7 +68,7 @@ function CookieBanner({
     )[0];
 
     const group_id = group.pk;
-
+    console.log(group, cookieVarName, isAccepted);
     cookieStates[cookieVarName] = isAccepted
       ? group.fields.created
       : '-1';
@@ -148,46 +148,44 @@ function CookieBanner({
   useEffect(() => {
     console.log('STARUP', Cookies.get('cookieSelectionDone'));
     const current_accept_state = Cookies.get('cookie_consent') || '';
-    if (!shouldBannerBeShown()) {
-      if (cookieStates === null) {
-        //Means we should determine the state our selfs
-        console.log('Cookie state null was passsed');
-        const current_accept_state =
-          Cookies.get('cookie_consent') || '';
-        console.log('current acceptance', current_accept_state);
-        if (current_accept_state === '') {
-          cookieStates = {};
-          console.log('Set empty state dict');
-        } else {
-          console.log(
-            'Trying to self determine state',
-            current_accept_state.split('|')
-          );
-          //cookieStages = current_accept_state.split('|');
+    if (cookieStates === null) {
+      //Means we should determine the state our selfs
+      console.log('Cookie state null was passsed');
+      const current_accept_state =
+        Cookies.get('cookie_consent') || '';
+      console.log('current acceptance', current_accept_state);
+      if (current_accept_state === '') {
+        cookieStates = {};
+        console.log('Set empty state dict');
+      } else {
+        console.log(
+          'Trying to self determine state',
+          current_accept_state.split('|')
+        );
+        //cookieStages = current_accept_state.split('|');
 
-          cookieStates = {};
-          current_accept_state.split('|').forEach((e) => {
-            const keys = e.split('=');
-            console.log(keys);
-            cookieStates[keys[0]] = keys[1];
-          });
-          console.log('Determined', cookieStates);
-        }
+        cookieStates = {};
+        current_accept_state.split('|').forEach((e) => {
+          const keys = e.split('=');
+          console.log(keys);
+          cookieStates[keys[0]] = keys[1];
+        });
+        console.log('Determined', cookieStates);
       }
-      // Then we might have to load in script that that category wants
-      Object.keys(cookieStates).forEach((set) => {
-        if (cookieStates[set] !== '-1') {
-          console.log('Found existing cookie to be accepted', set);
-          const group = cookieGroups.filter(
-            (g) => g.fields.varname === set
-          )[0];
-
-          const group_id = group.pk;
-          console.log('belonging to group', group, 'adding...');
-          acceptAndInjectScripts(group_id, cookieSets);
-        }
-      });
     }
+    // Then we might have to load in script that that category wants
+    Object.keys(cookieStates).forEach((set) => {
+      if (cookieStates[set] !== '-1') {
+        console.log('Found existing cookie to be accepted', set);
+        const group = cookieGroups.filter(
+          (g) => g.fields.varname === set
+        )[0];
+
+        const group_id = group.pk;
+        console.log('belonging to group', group, 'adding...');
+        acceptAndInjectScripts(group_id, cookieSets);
+      }
+    });
   });
 
   return (
