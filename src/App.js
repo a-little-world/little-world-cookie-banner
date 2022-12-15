@@ -1,27 +1,29 @@
-import { indexCSS, cookieBannerCSS, overlayCSS } from './styles';
-import { CookieBig, CookieSmall } from './svg';
 import React, { useEffect, useRef, useState } from 'react';
-import Cookies from 'js-cookie';
-import { useLocation, useNavigate } from 'react-router-dom';
-import { useTranslation, initReactI18next } from 'react-i18next';
+import { useTranslation } from 'react-i18next';
 import $ from 'jquery';
-import { BACKEND_URL, STORYBOOK } from './ENVIRONMENT';
-import { OverlayMacro } from './overlay';
 import {
   addScriptSrcToDom,
   addScriptToDom,
   acceptAndInjectScripts,
 } from './cookieTagInsertionLib';
+import { BACKEND_URL } from './ENVIRONMENT';
+import Cookies from 'js-cookie';
 
-function CookieBanner({
+import { indexCSS } from './styles';
+import CookieBanner from './components/CookieBanner';
+import OpenBannerButton from './components/OpenBannerButton';
+import Modal from './components/Modal';
+
+const SHOW_BANNER_COOKIE_NAME = 'cookieSelectionDone';
+
+function App({
   cookieGroups,
   cookieSets,
   cookieStates,
   toImpressumFunc,
   toPrivacyFunc,
 }) {
-  const styles =
-    indexCSS + '\n' + cookieBannerCSS + '\n' + overlayCSS; // All merged styles ( neeed to be included like this since we are using a shadow dom )
+  const styles = indexCSS; // All merged styles ( neeed to be included like this since we are using a shadow dom )
 
   const showBannerCookieName = 'cookieSelectionDone';
   const shouldBannerBeShown = () => {
@@ -131,18 +133,15 @@ function CookieBanner({
   };
 
   const onExit = () => {
-    Cookies.set(showBannerCookieName, '1');
+    Cookies.set(SHOW_BANNER_COOKIE_NAME, '1');
     declineAllNonEssentialCookies();
     setShow(false); // We still hide the banner, but we don't store the cookie as accepted
   };
-  const onOk = () => {
-    Cookies.set(showBannerCookieName, '1');
+
+  const onAccept = () => {
+    Cookies.set(SHOW_BANNER_COOKIE_NAME, '1');
     acceptAllNonEssentialCookies();
     setShow(false);
-  };
-
-  const clickSmallCookie = () => {
-    setShow(true);
   };
 
   useEffect(() => {
@@ -191,108 +190,17 @@ function CookieBanner({
   return (
     <div id="reset-this-root" className="reset-this">
       <style>{styles}</style>
-      {show ? (
-        <OverlayMacro>
-          <div className="banner-dynamic-break">
-            <div className="banner-img-container">
-              <CookieBig></CookieBig>
-            </div>
-            <div className="banner-body">
-              <h1>Cookie Einstellungen</h1>
-              <p>
-                <b>Wir verwenden Cookies und Daten, um </b>
-                <ul>
-                  <li>
-                    Die Anmeldung, Registration und sichere Nutzung
-                    von Little World zu ermöglichen
-                  </li>
-                  <li>Cookie Einwilligungen zu verwalten.</li>
-                  <li>verschiedene sprachen anzuzeigen.</li>
-                </ul>
-              </p>
-              <p>
-                <b>
-                  Wenn Sie „Alle akzeptieren“ auswählen, verwenden wir
-                  Cookies und Daten auch, um{' '}
-                </b>
-                <ul>
-                  <li>
-                    die Nutzung unserer Webseite statistisch
-                    auszuwerten.
-                  </li>
-                  <li>auf Sie zugeschnittene Werbung anzuzeigen.</li>
-                </ul>
-              </p>
-              <p>
-                <b>
-                  {' '}
-                  Wenn Sie „Alle ablehnen“ auswählen, verwenden wir
-                  Cookies nicht für diese zusätzlichen Zwecke.{' '}
-                </b>{' '}
-                <br></br>
-                Die Einstellungen für Cookies können Sie jederzeit
-                aufrufen und diese auch nachträglich abwählen.
-              </p>
-              <div className="banner-button-container clearfix">
-                <button
-                  type="button"
-                  className="av-setup-decline left"
-                  onClick={onExit}
-                >
-                  Alle ablehnen
-                </button>
-                <button
-                  type="button"
-                  className="av-setup-confirm right"
-                  onClick={onOk}
-                >
-                  Alle akzeptieren
-                </button>
-              </div>
-              <div className="banner-extra-options-dyn-container">
-                <div className="banner-spacer"></div>
-                <div
-                  className="banner-more-options"
-                  style={{ display: 'none' }}
-                >
-                  <a href="/cookies">Weitere optionen</a>
-                </div>
-                <div className="banner-more-options">
-                  <div className="banner-button-container banner-small-container">
-                    <button
-                      className="left link-button"
-                      onClick={() => {
-                        toImpressumFunc();
-                      }}
-                    >
-                      Impressum
-                    </button>
-                    <button
-                      className="right link-button"
-                      onClick={() => {
-                        toPrivacyFunc();
-                      }}
-                    >
-                      Datenschutz
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </OverlayMacro>
-      ) : (
-        <div
-          className="cookieBannerHidden"
-          onClick={() => {
-            clickSmallCookie();
-          }}
-        >
-          <CookieSmall></CookieSmall>
-        </div>
-      )}
+      <Modal open={show} onClose={() => setShow(false)} locked>
+        <CookieBanner
+          onExit={onExit}
+          onAccept={onAccept}
+          toImpressumFunc={toImpressumFunc}
+          toPrivacyFunc={toPrivacyFunc}
+        />
+      </Modal>
+      {!show && <OpenBannerButton onClick={() => setShow(true)} />}
     </div>
   );
 }
 
-export default CookieBanner;
+export default App;
