@@ -172,7 +172,7 @@ const CookieBanner = ({ onAccept, onExit, toImpressumFunc, toPrivacyFunc }) => {
                     </SolidButton>
                 </ButtonsContainer>
                 <Options>
-                    <MoreOptions href="/cookies">{t('moreOptions')}</MoreOptions>
+                    <MoreOptions href="/cookies" style={{display: 'none'}}>{t('moreOptions')}</MoreOptions>
                     <button onClick={toImpressumFunc}>
                       {t('impressum')}
                     </button>
