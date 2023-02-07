@@ -78,7 +78,9 @@ function App({
     Cookies.remove('cookie_consent');
     const cookieString = statesToString(cookieStates);
     console.log('Writing cookie string', cookieString);
-    Cookies.set('cookie_consent', cookieString);
+    Cookies.set('cookie_consent', cookieString, {
+      domain: '.little-world.com',
+    });
 
     console.log('Updated cookie states', cookieStates);
 
@@ -133,13 +135,17 @@ function App({
   };
 
   const onExit = () => {
-    Cookies.set(SHOW_BANNER_COOKIE_NAME, '1');
+    Cookies.set(SHOW_BANNER_COOKIE_NAME, '1', {
+      domain: '.little-world.com',
+    });
     declineAllNonEssentialCookies();
     setShow(false); // We still hide the banner, but we don't store the cookie as accepted
   };
 
   const onAccept = () => {
-    Cookies.set(SHOW_BANNER_COOKIE_NAME, '1');
+    Cookies.set(SHOW_BANNER_COOKIE_NAME, '1', {
+      domain: '.little-world.com',
+    });
     acceptAllNonEssentialCookies();
     setShow(false);
   };
