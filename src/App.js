@@ -13,9 +13,7 @@ import { indexCSS } from './styles';
 import CookieBanner from './components/CookieBanner';
 import OpenBannerButton from './components/OpenBannerButton';
 import Modal from './components/Modal';
-
 const SHOW_BANNER_COOKIE_NAME = 'cookieSelectionDone';
-
 function App({
   cookieGroups,
   cookieSets,
