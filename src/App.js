@@ -78,6 +78,7 @@ function App({
     console.log('Writing cookie string', cookieString);
     Cookies.set('cookie_consent', cookieString, {
       domain: '.little-world.com',
+      expires: 30, /** cookie valid for 30 days then the cookie banner is shown again regardless */
     });
 
     console.log('Updated cookie states', cookieStates);
@@ -135,6 +136,7 @@ function App({
   const onExit = () => {
     Cookies.set(SHOW_BANNER_COOKIE_NAME, '1', {
       domain: '.little-world.com',
+      expires: 30, /** cookie valid for 30 days then the cookie banner is shown again regardless */
     });
     declineAllNonEssentialCookies();
     setShow(false); // We still hide the banner, but we don't store the cookie as accepted
@@ -143,6 +145,7 @@ function App({
   const onAccept = () => {
     Cookies.set(SHOW_BANNER_COOKIE_NAME, '1', {
       domain: '.little-world.com',
+      expires: 30, /** cookie valid for 30 days then the cookie banner is shown again regardless */
     });
     acceptAllNonEssentialCookies();
     setShow(false);
