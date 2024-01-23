@@ -37,21 +37,22 @@ const BackdropContainer = styled.div`
     opacity: 0;
   }
 
-  ${({ $active }) => $active && css`
-    transition-duration: 250ms;
-    transition-delay: 0ms;
-    opacity: 1;
-
-    > div {
-      transform: translateY(0);
+  ${({ $active }) =>
+    $active &&
+    css`
+      transition-duration: 250ms;
+      transition-delay: 0ms;
       opacity: 1;
-      transition-delay: 150ms;
-      transition-duration: 350ms;
-    }
-  `
-  }
+
+      > div {
+        transform: translateY(0);
+        opacity: 1;
+        transition-delay: 150ms;
+        transition-duration: 350ms;
+      }
+    `}
 }
-`
+`;
 
 const Modal = ({ children, open, onClose, locked, parent, className }) => {
   const [active, setActive] = useState(false);
@@ -102,14 +103,14 @@ const Modal = ({ children, open, onClose, locked, parent, className }) => {
   }, [open, locked, onClose]);
 
   const Backdrop = (
-      <BackdropContainer
-        aria-modal={true}
-        aria-label={BACKDROP_LABEL}
-        ref={backdrop}
-        $active={active && open}
-      >
-        {children}
-      </BackdropContainer>
+    <BackdropContainer
+      aria-modal={true}
+      aria-label={BACKDROP_LABEL}
+      ref={backdrop}
+      $active={active && open}
+    >
+      {children}
+    </BackdropContainer>
   );
 
   if (open || active) return Backdrop;

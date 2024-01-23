@@ -20,7 +20,7 @@ function App({
 }) {
   const styles = indexCSS; // All merged styles ( neeed to be included like this since we are using a shadow dom )
 
-  const consentState = useRef()
+  const consentState = useRef();
 
   const [show, setShow] = useState(false);
 
@@ -47,7 +47,7 @@ function App({
     script.id = id;
   };
 
-  const addAllOfCookieGroup = (groupname) => {
+  const addAllOfCookieGroup = groupname => {
     console.log('adding all script of ', groupname);
     if (groupname in cookieScriptMap) {
       cookieScriptMap[groupname].src.forEach((src, i) => {
@@ -59,41 +59,41 @@ function App({
     }
   };
 
-    const cookieAcceptanceUpdate = (isAccepted, cookieVarName) => {
-        $.ajax({
-            type: 'POST',
-            url: `${BACKEND_URL}/cookies/${
-                isAccepted ? 'accept' : 'decline'
-            }/${cookieVarName}/`,
-            headers: {
-                'X-CSRFToken': Cookies.get('csrftoken'),
-            },
-            data: {},
-            success: () => {
-                console.log('Operation suceeded');
-            },
-            error: () => {
-                console.log('Operation failed');
-            },
-        });
+  const cookieAcceptanceUpdate = (isAccepted, cookieVarName) => {
+    $.ajax({
+      type: 'POST',
+      url: `${BACKEND_URL}/cookies/${
+        isAccepted ? 'accept' : 'decline'
+      }/${cookieVarName}/`,
+      headers: {
+        'X-CSRFToken': Cookies.get('csrftoken'),
+      },
+      data: {},
+      success: () => {
+        console.log('Operation suceeded');
+      },
+      error: () => {
+        console.log('Operation failed');
+      },
+    });
   };
 
-    const acceptAllNonEssentialCookies = () => {
-        // Declines all cookies that are not essential
-        cookieGroups.forEach((e) => {
-            console.log('COOK', e);
-            if (!e.fields.is_required) {
-                cookieAcceptanceUpdate(true, e.fields.varname);
-            }
-            console.log('varname', e.fields.varname);
-            if (e.fields.varname in cookieScriptMap) {
-                console.log('Found existing tag');
-                console.log('Adding: ', cookieScriptMap[e.fields.varname]);
-                addAllOfCookieGroup(e.fields.varname);
-            }
-            consentState.current[e.fields.varname] = '1';
-        });
-        /*
+  const acceptAllNonEssentialCookies = () => {
+    // Declines all cookies that are not essential
+    cookieGroups.forEach(e => {
+      console.log('COOK', e);
+      if (!e.fields.is_required) {
+        cookieAcceptanceUpdate(true, e.fields.varname);
+      }
+      console.log('varname', e.fields.varname);
+      if (e.fields.varname in cookieScriptMap) {
+        console.log('Found existing tag');
+        console.log('Adding: ', cookieScriptMap[e.fields.varname]);
+        addAllOfCookieGroup(e.fields.varname);
+      }
+      consentState.current[e.fields.varname] = '1';
+    });
+    /*
         TODO set the cookies in the browser if it's not done by request
         Cookies.set(
         'cookie_consent',
@@ -106,43 +106,39 @@ function App({
             .toString()
         );
         */
-    };
+  };
 
-    const declineAllNonEssentialCookies = () => {
-        // Declines all cookies that are not essential
-        cookieGroups.forEach((e) => {
-        if (!e.fields.is_required) {
-            cookieAcceptanceUpdate(false, e.fields.varname);
-        }
-        });
-    };
+  const declineAllNonEssentialCookies = () => {
+    // Declines all cookies that are not essential
+    cookieGroups.forEach(e => {
+      if (!e.fields.is_required) {
+        cookieAcceptanceUpdate(false, e.fields.varname);
+      }
+    });
+  };
 
-    const onExit = () => {
-        Cookies.set(SHOW_BANNER_COOKIE_NAME, '1');
-        declineAllNonEssentialCookies();
-        setShow(false); // We still hide the banner, but we don't store the cookie as accepted
-    };
+  const onExit = () => {
+    Cookies.set(SHOW_BANNER_COOKIE_NAME, '1');
+    declineAllNonEssentialCookies();
+    setShow(false); // We still hide the banner, but we don't store the cookie as accepted
+  };
 
-    const onAccept = () => {
-        Cookies.set(SHOW_BANNER_COOKIE_NAME, '1');
-        acceptAllNonEssentialCookies();
-        setShow(false);
-    };
+  const onAccept = () => {
+    Cookies.set(SHOW_BANNER_COOKIE_NAME, '1');
+    acceptAllNonEssentialCookies();
+    setShow(false);
+  };
 
   useEffect(() => {
-      const cookieValue = Cookies.get(SHOW_BANNER_COOKIE_NAME);
-      setShow(cookieValue === undefined ? true : false);
-  }, [])
+    const cookieValue = Cookies.get(SHOW_BANNER_COOKIE_NAME);
+    setShow(cookieValue === undefined ? true : false);
+  }, []);
 
   useEffect(() => {
     console.log({ cookieStates, cookieSets, cookieGroups });
-    consentState.current = Object.assign(
-      {},
-      loadCurrentConsents(),
-      cookieSets
-    );
+    consentState.current = Object.assign({}, loadCurrentConsents(), cookieSets);
 
-    cookieGroups?.forEach((e) => {
+    cookieGroups?.forEach(e => {
       if (e.fields.varname in consentState.current) {
         if (consentState.current[e.fields.varname] === '1') {
           addAllOfCookieGroup(e.fields.varname);
@@ -158,21 +154,15 @@ function App({
   return (
     <div id="reset-this-root" className="reset-this">
       <style>{styles}</style>
-        <Modal
-          open={show}
-          onClose={() => setShow(false)}
-          locked
-        >
-          <CookieBanner
-            onExit={onExit}
-            onAccept={onAccept}
-            toImpressumFunc={toImpressumFunc}
-            toPrivacyFunc={toPrivacyFunc}
-          />
-        </Modal>
-      {!show && (
-        <OpenBannerButton onClick={() => setShow(true)} />
-      )}
+      <Modal open={show} onClose={() => setShow(false)} locked>
+        <CookieBanner
+          onExit={onExit}
+          onAccept={onAccept}
+          toImpressumFunc={toImpressumFunc}
+          toPrivacyFunc={toPrivacyFunc}
+        />
+      </Modal>
+      {!show && <OpenBannerButton onClick={() => setShow(true)} />}
     </div>
   );
 }

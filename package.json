@@ -1,7 +1,8 @@
 {
-  "name": "little-world-admin-panel",
+  "name": "little-world-cookie-banner",
   "version": "0.1.0",
   "private": true,
+  "prettier": "@a-little-world/little-world-prettier-config",
   "dependencies": {
     "@testing-library/jest-dom": "^5.16.5",
     "@testing-library/react": "^13.4.0",
@@ -42,6 +43,7 @@
     ]
   },
   "devDependencies": {
+    "@a-little-world/little-world-prettier-config": "^1.2.0",
     "prettier": "^2.7.1"
   }
 }

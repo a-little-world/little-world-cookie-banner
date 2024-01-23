@@ -1,44 +1,46 @@
 import React from 'react';
-import ReactDOM from "react-dom/client";
+import ReactDOM from 'react-dom/client';
 import { StyleSheetManager } from 'styled-components';
-import i18n from "i18next";
-import { initReactI18next } from "react-i18next";
+import i18n from 'i18next';
+import { initReactI18next } from 'react-i18next';
 
 import App from './App';
 import reportWebVitals from './reportWebVitals';
 import { DEVELOPMENT } from './ENVIRONMENT';
 
-i18n
-  .use(initReactI18next)
-  .init({
-    resources: {
-      de: {
-        translation: {
-          "title": "Cookie Einstellungen",
-          "paragraph1": "Wir verwenden Cookies und Daten, um ",
-          "listItem1": "Die Anmeldung, Registration und sichere Nutzung von Little World zu ermöglichen",
-          "listItem2": "Cookie Einwilligungen zu verwalten.",
-          "listItem3": "verschiedene sprachen anzuzeigen.",
-          "paragraph2": "Wenn Sie „Alle akzeptieren“ auswählen, verwenden wir Cookies und Daten auch, um",
-           "listItem4": "die Nutzung unserer Webseite statistisch auszuwerten.",
-           "listItem5": "auf Sie zugeschnittene Werbung anzuzeigen.",
-           "disclaimer1": "Wenn Sie „Alle ablehnen“ auswählen, verwenden wir Cookies nicht für diese zusätzlichen Zwecke.",
-           "disclaimer2": "Die Einstellungen für Cookies können Sie jederzeit aufrufen und diese auch nachträglich abwählen.",
-           "declineButton": "Alle ablehnen",
-           "acceptButton": "Alle akzeptieren",
-           "moreOptions": "Weitere Optionen",
-           "impressum": "Impressum",
-           "dataPrivacy": "Datenschutz"
-        }
-      }
+i18n.use(initReactI18next).init({
+  resources: {
+    de: {
+      translation: {
+        title: 'Cookie Einstellungen',
+        paragraph1: 'Wir verwenden Cookies und Daten, um ',
+        listItem1:
+          'Die Anmeldung, Registration und sichere Nutzung von Little World zu ermöglichen',
+        listItem2: 'Cookie Einwilligungen zu verwalten.',
+        listItem3: 'verschiedene sprachen anzuzeigen.',
+        paragraph2:
+          'Wenn Sie „Alle akzeptieren“ auswählen, verwenden wir Cookies und Daten auch, um',
+        listItem4: 'die Nutzung unserer Webseite statistisch auszuwerten.',
+        listItem5: 'auf Sie zugeschnittene Werbung anzuzeigen.',
+        disclaimer1:
+          'Wenn Sie „Alle ablehnen“ auswählen, verwenden wir Cookies nicht für diese zusätzlichen Zwecke.',
+        disclaimer2:
+          'Die Einstellungen für Cookies können Sie jederzeit aufrufen und diese auch nachträglich abwählen.',
+        declineButton: 'Alle ablehnen',
+        acceptButton: 'Alle akzeptieren',
+        moreOptions: 'Weitere Optionen',
+        impressum: 'Impressum',
+        dataPrivacy: 'Datenschutz',
+      },
     },
-    lng: "de",
-    fallbackLng: "de",
+  },
+  lng: 'de',
+  fallbackLng: 'de',
 
-    interpolation: {
-      escapeValue: false
-    }
-  });
+  interpolation: {
+    escapeValue: false,
+  },
+});
 
 const renderApp = (
   cookieGroupsJSON,
@@ -46,7 +48,7 @@ const renderApp = (
   cookieStateDictJSON,
   toImpressumFunc,
   toPrivacyFunc,
-  scriptsToAdd = {}
+  scriptsToAdd = {},
 ) => {
   const host = document.querySelector('#shadow-root');
   const shadow = host.attachShadow({ mode: 'open' });
@@ -74,7 +76,7 @@ const renderApp = (
           cookieScriptMap={scriptsToAdd}
         />
       </StyleSheetManager>
-    </React.StrictMode>
+    </React.StrictMode>,
   );
 };
 
@@ -85,7 +87,7 @@ if (DEVELOPMENT) {
     { AnalyticsCookies: '-1' },
     () => {},
     () => {},
-    {}
+    {},
   );
 } else {
   // Window function registered to be called from inside a django view

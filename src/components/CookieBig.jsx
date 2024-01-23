@@ -40,6 +40,6 @@ const CookieBig = ({ className }) => (
       </clipPath>
     </defs>
   </svg>
-)
+);
 
-export default CookieBig
+export default CookieBig;
