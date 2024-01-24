@@ -1,7 +1,7 @@
-import styled from 'styled-components';
 import { useTranslation } from 'react-i18next';
-import { device } from '../styles';
+import styled from 'styled-components';
 
+import { device } from '../styles';
 import CookieBig from './CookieBig';
 
 const Container = styled.div`
@@ -165,7 +165,9 @@ const CookieBanner = ({ onAccept, onExit, toImpressumFunc, toPrivacyFunc }) => {
           </SolidButton>
         </ButtonsContainer>
         <Options>
-          <MoreOptions href="/cookies">{t('moreOptions')}</MoreOptions>
+          <MoreOptions href="/cookies" style={{ display: 'none' }}>
+            {t('moreOptions')}
+          </MoreOptions>
           <button onClick={toImpressumFunc}>{t('impressum')}</button>
           <button onClick={toPrivacyFunc}>{t('dataPrivacy')}</button>
         </Options>

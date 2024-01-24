@@ -1,5 +1,6 @@
 import styled from 'styled-components';
-import CookieSmall from './CookieSmall';
+
+import CookieBig from './CookieBig';
 
 const StyledButton = styled.button`
   position: absolute;
@@ -17,7 +18,7 @@ const StyledButton = styled.button`
 const OpenBannerButton = ({ onClick }) => {
   return (
     <StyledButton className="bloo-balh" onClick={onClick}>
-      <CookieSmall />
+      <CookieBig />
     </StyledButton>
   );
 };

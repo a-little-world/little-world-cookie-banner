@@ -1,62 +1,37 @@
-import React, { useEffect, useRef, useState } from 'react';
 import $ from 'jquery';
-import { BACKEND_URL } from './ENVIRONMENT';
 import Cookies from 'js-cookie';
+import React, { useEffect, useState } from 'react';
 
-import { indexCSS } from './styles';
+import { BACKEND_URL } from './ENVIRONMENT';
 import CookieBanner from './components/CookieBanner';
-import OpenBannerButton from './components/OpenBannerButton';
 import Modal from './components/Modal';
+import OpenBannerButton from './components/OpenBannerButton';
+import { acceptAndInjectScripts } from './cookieTagInsertionLib';
+import { indexCSS } from './styles';
 
 const SHOW_BANNER_COOKIE_NAME = 'cookieSelectionDone';
-
 function App({
   cookieGroups,
   cookieSets,
   cookieStates,
   toImpressumFunc,
   toPrivacyFunc,
-  cookieScriptMap = {},
 }) {
   const styles = indexCSS; // All merged styles ( neeed to be included like this since we are using a shadow dom )
 
-  const consentState = useRef();
-
-  const [show, setShow] = useState(false);
-
-  const loadCurrentConsents = () => {
-    const cookieName = 'cookie_consent';
-    return Cookies.get(cookieName, {}); //The current acceptance state
+  const showBannerCookieName = 'cookieSelectionDone';
+  const shouldBannerBeShown = () => {
+    const cookieValue = Cookies.get(showBannerCookieName);
+    return cookieValue === undefined ? true : false;
   };
+  const [show, setShow] = useState(shouldBannerBeShown());
 
-  const addScriptBySrc = (scriptSrc, id) => {
-    const script = document.createElement('script');
-    document.head.appendChild(script);
-    script.async = true;
-    script.id = id;
-    script.src = scriptSrc;
-  };
-
-  const addScriptFromString = (scriptString, id) => {
-    const script = document.createElement('script');
-    document.head.appendChild(script);
-    var inlineScript = document.createTextNode(scriptString);
-    script.appendChild(inlineScript);
-    document.head.appendChild(script);
-    script.async = true;
-    script.id = id;
-  };
-
-  const addAllOfCookieGroup = groupname => {
-    console.log('adding all script of ', groupname);
-    if (groupname in cookieScriptMap) {
-      cookieScriptMap[groupname].src.forEach((src, i) => {
-        addScriptBySrc(src, groupname + '-' + i);
-      });
-      cookieScriptMap[groupname].codes.forEach((code, i) => {
-        addScriptFromString(code, groupname + '-' + i);
-      });
-    }
+  const statesToString = states => {
+    const out = [];
+    Object.keys(states).forEach(k => {
+      out.push(k.toString() + '=' + states[k].toString());
+    });
+    return out.join('|');
   };
 
   const cookieAcceptanceUpdate = (isAccepted, cookieVarName) => {
@@ -76,36 +51,24 @@ function App({
         console.log('Operation failed');
       },
     });
-  };
+    const group = cookieGroups.filter(
+      g => g.fields.varname === cookieVarName,
+    )[0];
 
-  const acceptAllNonEssentialCookies = () => {
-    // Declines all cookies that are not essential
-    cookieGroups.forEach(e => {
-      console.log('COOK', e);
-      if (!e.fields.is_required) {
-        cookieAcceptanceUpdate(true, e.fields.varname);
-      }
-      console.log('varname', e.fields.varname);
-      if (e.fields.varname in cookieScriptMap) {
-        console.log('Found existing tag');
-        console.log('Adding: ', cookieScriptMap[e.fields.varname]);
-        addAllOfCookieGroup(e.fields.varname);
-      }
-      consentState.current[e.fields.varname] = '1';
+    const group_id = group.pk;
+    cookieStates[cookieVarName] = isAccepted ? group.fields.created : '-1';
+
+    Cookies.remove('cookie_consent');
+    const cookieString = statesToString(cookieStates);
+    Cookies.set('cookie_consent', cookieString, {
+      domain: '.little-world.com',
+      expires: 30 /** cookie valid for 30 days then the cookie banner is shown again regardless */,
+      path: '/',
     });
-    /*
-        TODO set the cookies in the browser if it's not done by request
-        Cookies.set(
-        'cookie_consent',
-        Object.entries(consentState.current)
-            .map(
-            ([k, v]) =>
-                `${encodeURIComponent(k)}=${encodeURIComponent(v)}`
-            )
-            .join('&')
-            .toString()
-        );
-        */
+
+    if (isAccepted) {
+      acceptAndInjectScripts(group_id, cookieSets);
+    }
   };
 
   const declineAllNonEssentialCookies = () => {
@@ -117,39 +80,62 @@ function App({
     });
   };
 
+  const acceptAllNonEssentialCookies = () => {
+    // Declines all cookies that are not essential
+    cookieGroups.forEach(e => {
+      if (!e.fields.is_required) {
+        cookieAcceptanceUpdate(true, e.fields.varname);
+      }
+    });
+  };
+
   const onExit = () => {
-    Cookies.set(SHOW_BANNER_COOKIE_NAME, '1');
+    Cookies.set(SHOW_BANNER_COOKIE_NAME, '1', {
+      domain: '.little-world.com',
+      expires: 30 /** cookie valid for 30 days then the cookie banner is shown again regardless */,
+      path: '/',
+    });
     declineAllNonEssentialCookies();
     setShow(false); // We still hide the banner, but we don't store the cookie as accepted
   };
 
   const onAccept = () => {
-    Cookies.set(SHOW_BANNER_COOKIE_NAME, '1');
+    Cookies.set(SHOW_BANNER_COOKIE_NAME, '1', {
+      domain: '.little-world.com',
+      expires: 30 /** cookie valid for 30 days then the cookie banner is shown again regardless */,
+      path: '/',
+    });
     acceptAllNonEssentialCookies();
     setShow(false);
   };
 
   useEffect(() => {
-    const cookieValue = Cookies.get(SHOW_BANNER_COOKIE_NAME);
-    setShow(cookieValue === undefined ? true : false);
-  }, []);
+    if (cookieStates === null) {
+      //Means we should determine the state our selfs
+      const current_accept_state = Cookies.get('cookie_consent') || '';
 
-  useEffect(() => {
-    console.log({ cookieStates, cookieSets, cookieGroups });
-    consentState.current = Object.assign({}, loadCurrentConsents(), cookieSets);
-
-    cookieGroups?.forEach(e => {
-      if (e.fields.varname in consentState.current) {
-        if (consentState.current[e.fields.varname] === '1') {
-          addAllOfCookieGroup(e.fields.varname);
-        }
+      if (current_accept_state === '') {
+        cookieStates = {};
       } else {
-        // Then add all scripts of that kind regardless
-        addAllOfCookieGroup(e.fields.varname);
+        //cookieStages = current_accept_state.split('|');
+
+        cookieStates = {};
+        current_accept_state.split('|').forEach(e => {
+          const keys = e.split('=');
+          cookieStates[keys[0]] = keys[1];
+        });
+      }
+    }
+    // Then we might have to load in script that that category wants
+    Object.keys(cookieStates).forEach(set => {
+      if (cookieStates[set] !== '-1') {
+        const group = cookieGroups.filter(g => g.fields.varname === set)[0];
+
+        const group_id = group.pk;
+        acceptAndInjectScripts(group_id, cookieSets);
       }
     });
-    Cookies.set('cookie_consent', consentState.current);
-  }, [cookieGroups, cookieSets, cookieStates]);
+  });
 
   return (
     <div id="reset-this-root" className="reset-this">
