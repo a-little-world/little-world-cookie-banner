@@ -1,5 +1,5 @@
-import styled from "styled-components"
-import CookieSmall from "./CookieSmall"
+import styled from 'styled-components';
+
 import CookieBig from './CookieBig';
 
 const StyledButton = styled.button`
@@ -13,14 +13,14 @@ const StyledButton = styled.button`
   background-size: contain;
   left: 0;
   bottom: 0;
-`
+`;
 
 const OpenBannerButton = ({ onClick }) => {
-    return (
-        <StyledButton className='bloo-balh' onClick={onClick}>
-            <CookieBig />
-        </StyledButton>
-    )
-}
+  return (
+    <StyledButton className="bloo-balh" onClick={onClick}>
+      <CookieBig />
+    </StyledButton>
+  );
+};
 
-export default OpenBannerButton
+export default OpenBannerButton;

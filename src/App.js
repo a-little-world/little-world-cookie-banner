@@ -1,18 +1,14 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { useTranslation } from 'react-i18next';
 import $ from 'jquery';
-import {
-  addScriptSrcToDom,
-  addScriptToDom,
-  acceptAndInjectScripts,
-} from './cookieTagInsertionLib';
-import { BACKEND_URL } from './ENVIRONMENT';
 import Cookies from 'js-cookie';
+import React, { useEffect, useState } from 'react';
 
-import { indexCSS } from './styles';
+import { BACKEND_URL } from './ENVIRONMENT';
 import CookieBanner from './components/CookieBanner';
-import OpenBannerButton from './components/OpenBannerButton';
 import Modal from './components/Modal';
+import OpenBannerButton from './components/OpenBannerButton';
+import { acceptAndInjectScripts } from './cookieTagInsertionLib';
+import { indexCSS } from './styles';
+
 const SHOW_BANNER_COOKIE_NAME = 'cookieSelectionDone';
 function App({
   cookieGroups,
@@ -26,21 +22,13 @@ function App({
   const showBannerCookieName = 'cookieSelectionDone';
   const shouldBannerBeShown = () => {
     const cookieValue = Cookies.get(showBannerCookieName);
-    console.log('current show state', cookieValue);
     return cookieValue === undefined ? true : false;
   };
   const [show, setShow] = useState(shouldBannerBeShown());
-  const { t } = useTranslation();
-  const getAllCookiesFromGroup = (group) => {
-    return cookieSets.filter(
-      (cookie) => cookie.fields.cookiegroup === group.pk
-    );
-  };
-  console.log(cookieGroups, cookieSets, cookieStates);
 
-  const statesToString = (states) => {
+  const statesToString = states => {
     const out = [];
-    Object.keys(states).forEach((k) => {
+    Object.keys(states).forEach(k => {
       out.push(k.toString() + '=' + states[k].toString());
     });
     return out.join('|');
@@ -64,60 +52,28 @@ function App({
       },
     });
     const group = cookieGroups.filter(
-      (g) => g.fields.varname === cookieVarName
+      g => g.fields.varname === cookieVarName,
     )[0];
 
     const group_id = group.pk;
-    console.log(group, cookieVarName, isAccepted);
-    cookieStates[cookieVarName] = isAccepted
-      ? group.fields.created
-      : '-1';
+    cookieStates[cookieVarName] = isAccepted ? group.fields.created : '-1';
 
     Cookies.remove('cookie_consent');
     const cookieString = statesToString(cookieStates);
-    console.log('Writing cookie string', cookieString);
     Cookies.set('cookie_consent', cookieString, {
       domain: '.little-world.com',
-      expires: 30, /** cookie valid for 30 days then the cookie banner is shown again regardless */
+      expires: 30 /** cookie valid for 30 days then the cookie banner is shown again regardless */,
       path: '/',
     });
 
-    console.log('Updated cookie states', cookieStates);
-
     if (isAccepted) {
-      console.log('ACCEPTED: ', cookieVarName);
-      console.log('Group id', group_id);
       acceptAndInjectScripts(group_id, cookieSets);
     }
-  };
-  var currentConsentState = {};
-
-  const loadCurrentConsents = () => {
-    const cookieName = 'cookie_consent';
-    return Cookies.get(cookieName, ''); //The current acceptance state
-  };
-
-  const addScriptBySrc = (scriptSrc, id) => {
-    const script = document.createElement('script');
-    document.head.appendChild(script);
-    script.async = true;
-    script.id = id;
-    script.src = scriptSrc;
-  };
-
-  const addScriptFromString = (scriptString, id) => {
-    const script = document.createElement('script');
-    document.head.appendChild(script);
-    var inlineScript = document.createTextNode(scriptString);
-    script.appendChild(inlineScript);
-    document.head.appendChild(script);
-    script.async = true;
-    script.id = id;
   };
 
   const declineAllNonEssentialCookies = () => {
     // Declines all cookies that are not essential
-    cookieGroups.forEach((e) => {
+    cookieGroups.forEach(e => {
       if (!e.fields.is_required) {
         cookieAcceptanceUpdate(false, e.fields.varname);
       }
@@ -126,8 +82,7 @@ function App({
 
   const acceptAllNonEssentialCookies = () => {
     // Declines all cookies that are not essential
-    cookieGroups.forEach((e) => {
-      console.log('COOK', e);
+    cookieGroups.forEach(e => {
       if (!e.fields.is_required) {
         cookieAcceptanceUpdate(true, e.fields.varname);
       }
@@ -137,7 +92,7 @@ function App({
   const onExit = () => {
     Cookies.set(SHOW_BANNER_COOKIE_NAME, '1', {
       domain: '.little-world.com',
-      expires: 30, /** cookie valid for 30 days then the cookie banner is shown again regardless */
+      expires: 30 /** cookie valid for 30 days then the cookie banner is shown again regardless */,
       path: '/',
     });
     declineAllNonEssentialCookies();
@@ -147,7 +102,7 @@ function App({
   const onAccept = () => {
     Cookies.set(SHOW_BANNER_COOKIE_NAME, '1', {
       domain: '.little-world.com',
-      expires: 30, /** cookie valid for 30 days then the cookie banner is shown again regardless */
+      expires: 30 /** cookie valid for 30 days then the cookie banner is shown again regardless */,
       path: '/',
     });
     acceptAllNonEssentialCookies();
@@ -155,43 +110,28 @@ function App({
   };
 
   useEffect(() => {
-    console.log('STARUP', Cookies.get('cookieSelectionDone'));
-    const current_accept_state = Cookies.get('cookie_consent') || '';
     if (cookieStates === null) {
       //Means we should determine the state our selfs
-      console.log('Cookie state null was passsed');
-      const current_accept_state =
-        Cookies.get('cookie_consent') || '';
-      console.log('current acceptance', current_accept_state);
+      const current_accept_state = Cookies.get('cookie_consent') || '';
+
       if (current_accept_state === '') {
         cookieStates = {};
-        console.log('Set empty state dict');
       } else {
-        console.log(
-          'Trying to self determine state',
-          current_accept_state.split('|')
-        );
         //cookieStages = current_accept_state.split('|');
 
         cookieStates = {};
-        current_accept_state.split('|').forEach((e) => {
+        current_accept_state.split('|').forEach(e => {
           const keys = e.split('=');
-          console.log(keys);
           cookieStates[keys[0]] = keys[1];
         });
-        console.log('Determined', cookieStates);
       }
     }
     // Then we might have to load in script that that category wants
-    Object.keys(cookieStates).forEach((set) => {
+    Object.keys(cookieStates).forEach(set => {
       if (cookieStates[set] !== '-1') {
-        console.log('Found existing cookie to be accepted', set);
-        const group = cookieGroups.filter(
-          (g) => g.fields.varname === set
-        )[0];
+        const group = cookieGroups.filter(g => g.fields.varname === set)[0];
 
         const group_id = group.pk;
-        console.log('belonging to group', group, 'adding...');
         acceptAndInjectScripts(group_id, cookieSets);
       }
     });
