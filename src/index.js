@@ -15,13 +15,13 @@ i18n.use(initReactI18next).init({
         title: 'Cookie Einstellungen',
         paragraph1: 'Wir verwenden Cookies und Daten, um ',
         listItem1:
-          'Die Anmeldung, Registration und sichere Nutzung von Little World zu ermöglichen',
+          'die Anmeldung, Registration und sichere Nutzung von Little World zu ermöglichen',
         listItem2: 'Cookie Einwilligungen zu verwalten.',
-        listItem3: 'verschiedene sprachen anzuzeigen.',
+        listItem3: 'verschiedene Sprachen anzuzeigen.',
         paragraph2:
           'Wenn Sie „Alle akzeptieren“ auswählen, verwenden wir Cookies und Daten auch, um',
         listItem4: 'die Nutzung unserer Webseite statistisch auszuwerten.',
-        listItem5: 'auf Sie zugeschnittene Werbung anzuzeigen.',
+        listItem5: 'unsere Öffentlichkeitsarbeit zu verbessern.',
         disclaimer1:
           'Wenn Sie „Alle ablehnen“ auswählen, verwenden wir Cookies nicht für diese zusätzlichen Zwecke.',
         disclaimer2:
