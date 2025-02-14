@@ -69,7 +69,7 @@ function App({
     }*/
   };
 
-  /*const declineAllNonEssentialCookies = () => {
+  const declineAllNonEssentialCookies = () => {
     // Declines all cookies that are not essential
     cookieGroups.forEach(e => {
       if (!e.fields.is_required) {
@@ -80,32 +80,33 @@ function App({
 
   const acceptAllNonEssentialCookies = () => {
     // Declines all cookies that are not essential
-    cookieGroups.forEach(e => {
+    cookieData.forEach(e => {
       if (!e.fields.is_required) {
         cookieAcceptanceUpdate(true, e.fields.varname);
       }
     });
-  };*/
+  };
+
 
   const onExit = () => {
-    Cookies.set(SHOW_BANNER_COOKIE_NAME, '1', {
-      domain: '.little-world.com',
-      expires: 30 /** cookie valid for 30 days then the cookie banner is shown again regardless */,
-      path: '/',
+    fetch(`${BACKEND_URL}/api/cookies/all/deny`, {
+      method: "POST",
+      headers: {
+        "X-CSRFToken": Cookies.get("csrftoken"),
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
     });
-    declineAllNonEssentialCookies();
-    setShow(false); // We still hide the banner, but we don't store the cookie as accepted
   };
 
   const onAccept = () => {
-    Cookies.set(SHOW_BANNER_COOKIE_NAME, '1', {
-      domain: '.little-world.com',
-      expires: 30 /** cookie valid for 30 days then the cookie banner is shown again regardless */,
-      path: '/',
+    fetch(`${BACKEND_URL}/api/cookies/all/accept`, {
+      method: "POST",
+      headers: {
+        "X-CSRFToken": Cookies.get("csrftoken"),
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
     });
-    acceptAllNonEssentialCookies();
-    setShow(false);
-  };
+  }; 
 
  /*useEffect(() => {
     if (cookieStates === null) {
