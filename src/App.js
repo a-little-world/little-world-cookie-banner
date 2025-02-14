@@ -11,9 +11,7 @@ import { indexCSS } from './styles';
 
 const SHOW_BANNER_COOKIE_NAME = 'cookieSelectionDone';
 function App({
-  cookieGroups,
-  cookieSets,
-  cookieStates,
+  cookieData,
   toImpressumFunc,
   toPrivacyFunc,
 }) {
@@ -56,22 +54,22 @@ function App({
     )[0];
 
     const group_id = group.pk;
-    cookieStates[cookieVarName] = isAccepted ? group.fields.created : '-1';
+    /*cookieStates[cookieVarName] = isAccepted ? group.fields.created : '-1';*/
 
     Cookies.remove('cookie_consent');
-    const cookieString = statesToString(cookieStates);
+    //const cookieString = statesToString(cookieStates);
     Cookies.set('cookie_consent', cookieString, {
       domain: '.little-world.com',
       expires: 30 /** cookie valid for 30 days then the cookie banner is shown again regardless */,
       path: '/',
     });
 
-    if (isAccepted) {
+    /*if (isAccepted) {
       acceptAndInjectScripts(group_id, cookieSets);
-    }
+    }*/
   };
 
-  const declineAllNonEssentialCookies = () => {
+  /*const declineAllNonEssentialCookies = () => {
     // Declines all cookies that are not essential
     cookieGroups.forEach(e => {
       if (!e.fields.is_required) {
@@ -87,7 +85,7 @@ function App({
         cookieAcceptanceUpdate(true, e.fields.varname);
       }
     });
-  };
+  };*/
 
   const onExit = () => {
     Cookies.set(SHOW_BANNER_COOKIE_NAME, '1', {
@@ -109,7 +107,7 @@ function App({
     setShow(false);
   };
 
-  useEffect(() => {
+ /*useEffect(() => {
     if (cookieStates === null) {
       //Means we should determine the state our selfs
       const current_accept_state = Cookies.get('cookie_consent') || '';
@@ -135,7 +133,7 @@ function App({
         acceptAndInjectScripts(group_id, cookieSets);
       }
     });
-  });
+  }); */
 
   return (
     <div id="reset-this-root" className="reset-this">

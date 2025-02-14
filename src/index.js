@@ -43,9 +43,7 @@ i18n.use(initReactI18next).init({
 });
 
 const renderApp = (
-  cookieGroupsJSON,
-  cookieSetsJSON,
-  cookieStateDictJSON,
+  cookieData,
   toImpressumFunc,
   toPrivacyFunc,
   scriptsToAdd = {},
@@ -68,9 +66,7 @@ const renderApp = (
     <React.StrictMode>
       <StyleSheetManager target={styleSlot}>
         <App
-          cookieGroups={JSON.parse(cookieGroupsJSON)}
-          cookieSets={JSON.parse(cookieSetsJSON)}
-          cookieStates={cookieStateDictJSON}
+          cookieData={cookieData}
           toImpressumFunc={toImpressumFunc}
           toPrivacyFunc={toPrivacyFunc}
           cookieScriptMap={scriptsToAdd}
