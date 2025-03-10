@@ -133,7 +133,7 @@ const MoreOptions = styled.a`
 
 const CookieBanner = ({ onAccept, onExit, toImpressumFunc, toPrivacyFunc }) => {
   const { t } = useTranslation();
-
+  
   return (
     <Container>
       <ImageWrapper>

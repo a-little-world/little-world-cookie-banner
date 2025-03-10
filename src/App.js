@@ -1,10 +1,13 @@
+import {
+  CustomThemeProvider,
+  Modal,
+} from '@a-little-world/little-world-design-system';
 import $ from 'jquery';
 import Cookies from 'js-cookie';
 import React, { useEffect, useState } from 'react';
 
 import { BACKEND_URL } from './ENVIRONMENT';
 import CookieBanner from './components/CookieBanner';
-import Modal from './components/Modal';
 import OpenBannerButton from './components/OpenBannerButton';
 import { acceptAndInjectScripts } from './cookieTagInsertionLib';
 import { indexCSS } from './styles';
@@ -138,18 +141,20 @@ function App({
   });
 
   return (
-    <div id="reset-this-root" className="reset-this">
-      <style>{styles}</style>
-      <Modal open={show} onClose={() => setShow(false)} locked>
-        <CookieBanner
-          onExit={onExit}
-          onAccept={onAccept}
-          toImpressumFunc={toImpressumFunc}
-          toPrivacyFunc={toPrivacyFunc}
-        />
-      </Modal>
-      {!show && <OpenBannerButton onClick={() => setShow(true)} />}
-    </div>
+    <CustomThemeProvider>
+      <div id="reset-this-root" className="reset-this">
+        <style>{styles}</style>
+        <Modal open={show} onClose={() => setShow(false)} createInPortal={false} locked>
+          <CookieBanner
+            onExit={onExit}
+            onAccept={onAccept}
+            toImpressumFunc={toImpressumFunc}
+            toPrivacyFunc={toPrivacyFunc}
+          />
+        </Modal>
+        {!show && <OpenBannerButton onClick={() => setShow(true)} />}
+      </div>
+    </CustomThemeProvider>
   );
 }
 
