@@ -13,6 +13,13 @@ import { acceptAndInjectScripts } from './cookieTagInsertionLib';
 import { indexCSS } from './styles';
 
 const SHOW_BANNER_COOKIE_NAME = 'cookieSelectionDone';
+
+const shouldBannerBeShown = () => {
+  const cookieValue = Cookies.get(SHOW_BANNER_COOKIE_NAME);
+  console.log({cookieValue})
+  return cookieValue === undefined ? true : false;
+};
+
 function App({
   cookieGroups,
   cookieSets,
@@ -22,11 +29,6 @@ function App({
 }) {
   const styles = indexCSS; // All merged styles ( neeed to be included like this since we are using a shadow dom )
 
-  const showBannerCookieName = 'cookieSelectionDone';
-  const shouldBannerBeShown = () => {
-    const cookieValue = Cookies.get(showBannerCookieName);
-    return cookieValue === undefined ? true : false;
-  };
   const [show, setShow] = useState(shouldBannerBeShown());
 
   const statesToString = states => {

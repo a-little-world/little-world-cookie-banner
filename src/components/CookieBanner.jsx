@@ -60,10 +60,12 @@ const Paragraph = styled.div`
 const ButtonsContainer = styled.div`
   display: flex;
   margin-bottom: 30px;
+  justify-content: center;
 
   @media ${device.from.tablet} {
     flex-wrap: wrap;
     margin-bottom: 24px;
+    justify-content: flex-start;
   }
 `;
 
