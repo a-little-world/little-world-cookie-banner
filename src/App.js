@@ -1,15 +1,25 @@
+import {
+  CustomThemeProvider,
+  Modal,
+} from '@a-little-world/little-world-design-system';
 import $ from 'jquery';
 import Cookies from 'js-cookie';
 import React, { useEffect, useState } from 'react';
 
 import { BACKEND_URL } from './ENVIRONMENT';
 import CookieBanner from './components/CookieBanner';
-import Modal from './components/Modal';
 import OpenBannerButton from './components/OpenBannerButton';
 import { acceptAndInjectScripts } from './cookieTagInsertionLib';
 import { indexCSS } from './styles';
 
 const SHOW_BANNER_COOKIE_NAME = 'cookieSelectionDone';
+
+const shouldBannerBeShown = () => {
+  const cookieValue = Cookies.get(SHOW_BANNER_COOKIE_NAME);
+  console.log({cookieValue})
+  return cookieValue === undefined ? true : false;
+};
+
 function App({
   cookieGroups,
   cookieSets,
@@ -19,11 +29,6 @@ function App({
 }) {
   const styles = indexCSS; // All merged styles ( neeed to be included like this since we are using a shadow dom )
 
-  const showBannerCookieName = 'cookieSelectionDone';
-  const shouldBannerBeShown = () => {
-    const cookieValue = Cookies.get(showBannerCookieName);
-    return cookieValue === undefined ? true : false;
-  };
   const [show, setShow] = useState(shouldBannerBeShown());
 
   const statesToString = states => {
@@ -138,18 +143,20 @@ function App({
   });
 
   return (
-    <div id="reset-this-root" className="reset-this">
-      <style>{styles}</style>
-      <Modal open={show} onClose={() => setShow(false)} locked>
-        <CookieBanner
-          onExit={onExit}
-          onAccept={onAccept}
-          toImpressumFunc={toImpressumFunc}
-          toPrivacyFunc={toPrivacyFunc}
-        />
-      </Modal>
-      {!show && <OpenBannerButton onClick={() => setShow(true)} />}
-    </div>
+    <CustomThemeProvider>
+      <div id="reset-this-root" className="reset-this">
+        <style>{styles}</style>
+        <Modal open={show} onClose={() => setShow(false)} createInPortal={false} locked>
+          <CookieBanner
+            onExit={onExit}
+            onAccept={onAccept}
+            toImpressumFunc={toImpressumFunc}
+            toPrivacyFunc={toPrivacyFunc}
+          />
+        </Modal>
+        {!show && <OpenBannerButton onClick={() => setShow(true)} />}
+      </div>
+    </CustomThemeProvider>
   );
 }
 
