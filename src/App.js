@@ -144,7 +144,6 @@ function App({
 
   return (
     <CustomThemeProvider>
-      <div id="reset-this-root" className="reset-this">
         <style>{styles}</style>
         <Modal open={show} onClose={() => setShow(false)} createInPortal={false} locked>
           <CookieBanner
@@ -155,7 +154,6 @@ function App({
           />
         </Modal>
         {!show && <OpenBannerButton onClick={() => setShow(true)} />}
-      </div>
     </CustomThemeProvider>
   );
 }
