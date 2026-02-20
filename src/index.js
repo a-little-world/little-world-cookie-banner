@@ -5,7 +5,6 @@ import { initReactI18next } from 'react-i18next';
 import { StyleSheetManager } from 'styled-components';
 
 import App from './App';
-import reportWebVitals from './reportWebVitals';
 
 i18n.use(initReactI18next).init({
   resources: {
@@ -47,6 +46,7 @@ const renderApp = (
   cookieStateDictJSON,
   toImpressumFunc,
   toPrivacyFunc,
+  cookieBannerIsHidden = false,
   scriptsToAdd = {},
 ) => {
   const host = document.querySelector('#shadow-root');
@@ -72,6 +72,7 @@ const renderApp = (
           cookieStates={cookieStateDictJSON}
           toImpressumFunc={toImpressumFunc}
           toPrivacyFunc={toPrivacyFunc}
+          cookieBannerIsHidden={cookieBannerIsHidden}
           cookieScriptMap={scriptsToAdd}
         />
       </StyleSheetManager>
@@ -80,8 +81,3 @@ const renderApp = (
 };
 
 window.cookieBanner = renderApp;
-
-// If you want to start measuring performance in your app, pass a function
-// to log results (for example: reportWebVitals(console.log))
-// or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
-reportWebVitals();

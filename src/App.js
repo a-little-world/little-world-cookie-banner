@@ -101,7 +101,7 @@ function App({
       path: '/',
     });
     declineAllNonEssentialCookies();
-    setShow(false); // We still hide the banner, but we don't store the cookie as accepted
+    setShow(false);
   };
 
   const onAccept = () => {
@@ -143,9 +143,9 @@ function App({
   });
 
   return (
-    <CustomThemeProvider>
+    <>
       {cookieBannerIsHidden ? null : (
-        <>
+        <CustomThemeProvider>
           <style>{styles}</style>
           <Modal open={show} onClose={() => setShow(false)} createInPortal={false} locked>
             <CookieBanner
@@ -155,10 +155,10 @@ function App({
               toPrivacyFunc={toPrivacyFunc}
             />
           </Modal>
-        </>
+          {!show && <OpenBannerButton onClick={() => setShow(true)} />}
+        </CustomThemeProvider>
       )}
-      {!show && <OpenBannerButton onClick={() => setShow(true)} />}
-    </CustomThemeProvider>
+    </>
   );
 }
 
