@@ -16,7 +16,7 @@ const SHOW_BANNER_COOKIE_NAME = 'cookieSelectionDone';
 
 const shouldBannerBeShown = () => {
   const cookieValue = Cookies.get(SHOW_BANNER_COOKIE_NAME);
-  console.log({cookieValue})
+  console.log({ cookieValue })
   return cookieValue === undefined ? true : false;
 };
 
@@ -26,6 +26,7 @@ function App({
   cookieStates,
   toImpressumFunc,
   toPrivacyFunc,
+  cookieBannerIsHidden,
 }) {
   const styles = indexCSS; // All merged styles ( neeed to be included like this since we are using a shadow dom )
 
@@ -42,9 +43,8 @@ function App({
   const cookieAcceptanceUpdate = (isAccepted, cookieVarName) => {
     $.ajax({
       type: 'POST',
-      url: `${BACKEND_URL}/cookies/${
-        isAccepted ? 'accept' : 'decline'
-      }/${cookieVarName}/`,
+      url: `${BACKEND_URL}/cookies/${isAccepted ? 'accept' : 'decline'
+        }/${cookieVarName}/`,
       headers: {
         'X-CSRFToken': Cookies.get('csrftoken'),
       },
@@ -144,16 +144,20 @@ function App({
 
   return (
     <CustomThemeProvider>
-        <style>{styles}</style>
-        <Modal open={show} onClose={() => setShow(false)} createInPortal={false} locked>
-          <CookieBanner
-            onExit={onExit}
-            onAccept={onAccept}
-            toImpressumFunc={toImpressumFunc}
-            toPrivacyFunc={toPrivacyFunc}
-          />
-        </Modal>
-        {!show && <OpenBannerButton onClick={() => setShow(true)} />}
+      {cookieBannerIsHidden ? null : (
+        <>
+          <style>{styles}</style>
+          <Modal open={show} onClose={() => setShow(false)} createInPortal={false} locked>
+            <CookieBanner
+              onExit={onExit}
+              onAccept={onAccept}
+              toImpressumFunc={toImpressumFunc}
+              toPrivacyFunc={toPrivacyFunc}
+            />
+          </Modal>
+        </>
+      )}
+      {!show && <OpenBannerButton onClick={() => setShow(true)} />}
     </CustomThemeProvider>
   );
 }
