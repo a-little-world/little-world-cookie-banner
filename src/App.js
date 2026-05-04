@@ -13,6 +13,7 @@ import { acceptAndInjectScripts } from './cookieTagInsertionLib';
 import { indexCSS } from './styles';
 
 const SHOW_BANNER_COOKIE_NAME = 'cookieSelectionDone';
+const LEGACY_COOKIE_CONSENT_NAME = 'cookie_consent';
 
 const shouldBannerBeShown = () => {
   const cookieValue = Cookies.get(SHOW_BANNER_COOKIE_NAME);
@@ -24,6 +25,7 @@ function App({
   cookieGroups,
   cookieSets,
   cookieStates,
+  cookieConsentName = 'backend_cookie_consent',
   toImpressumFunc,
   toPrivacyFunc,
   cookieBannerIsHidden,
@@ -31,14 +33,6 @@ function App({
   const styles = indexCSS; // All merged styles ( neeed to be included like this since we are using a shadow dom )
 
   const [show, setShow] = useState(shouldBannerBeShown());
-
-  const statesToString = states => {
-    const out = [];
-    Object.keys(states).forEach(k => {
-      out.push(k.toString() + '=' + states[k].toString());
-    });
-    return out.join('|');
-  };
 
   const cookieAcceptanceUpdate = (isAccepted, cookieVarName) => {
     $.ajax({
@@ -62,14 +56,6 @@ function App({
 
     const group_id = group.pk;
     cookieStates[cookieVarName] = isAccepted ? group.fields.created : '-1';
-
-    Cookies.remove('cookie_consent');
-    const cookieString = statesToString(cookieStates);
-    Cookies.set('cookie_consent', cookieString, {
-      domain: '.little-world.com',
-      expires: 30 /** cookie valid for 30 days then the cookie banner is shown again regardless */,
-      path: '/',
-    });
 
     if (isAccepted) {
       acceptAndInjectScripts(group_id, cookieSets);
@@ -115,19 +101,25 @@ function App({
   };
 
   useEffect(() => {
-    if (cookieStates === null) {
+    if (cookieStates === null || Object.keys(cookieStates).length === 0) {
       //Means we should determine the state our selfs
-      const current_accept_state = Cookies.get('cookie_consent') || '';
+      const current_accept_state =
+        Cookies.get(cookieConsentName)
+        || Cookies.get(LEGACY_COOKIE_CONSENT_NAME)
+        || '';
+      const normalized_accept_state = current_accept_state.replace(/^"|"$/g, '');
 
-      if (current_accept_state === '') {
+      if (normalized_accept_state === '') {
         cookieStates = {};
       } else {
         //cookieStages = current_accept_state.split('|');
 
         cookieStates = {};
-        current_accept_state.split('|').forEach(e => {
-          const keys = e.split('=');
-          cookieStates[keys[0]] = keys[1];
+        normalized_accept_state.split('|').forEach(e => {
+          const [key, ...valueParts] = e.split('=');
+          if (key) {
+            cookieStates[key] = valueParts.join('=');
+          }
         });
       }
     }

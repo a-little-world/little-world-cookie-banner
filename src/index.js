@@ -48,6 +48,7 @@ const renderApp = (
   toPrivacyFunc,
   cookieBannerIsHidden = false,
   scriptsToAdd = {},
+  cookieConsentName = 'backend_cookie_consent',
 ) => {
   const host = document.querySelector('#shadow-root');
   const shadow = host.attachShadow({ mode: 'open' });
@@ -70,6 +71,7 @@ const renderApp = (
           cookieGroups={JSON.parse(cookieGroupsJSON)}
           cookieSets={JSON.parse(cookieSetsJSON)}
           cookieStates={cookieStateDictJSON}
+          cookieConsentName={cookieConsentName}
           toImpressumFunc={toImpressumFunc}
           toPrivacyFunc={toPrivacyFunc}
           cookieBannerIsHidden={cookieBannerIsHidden}
