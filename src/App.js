@@ -14,10 +14,15 @@ import { indexCSS } from './styles';
 
 const SHOW_BANNER_COOKIE_NAME = 'cookieSelectionDone';
 const LEGACY_COOKIE_CONSENT_NAME = 'cookie_consent';
+const SHARED_COOKIE_DOMAIN = '.little-world.com';
+
+const buildConsentCookieValue = (states = {}) =>
+  Object.entries(states)
+    .map(([key, value]) => `${key}=${value}`)
+    .join('|');
 
 const shouldBannerBeShown = () => {
   const cookieValue = Cookies.get(SHOW_BANNER_COOKIE_NAME);
-  console.log({ cookieValue })
   return cookieValue === undefined ? true : false;
 };
 
@@ -34,20 +39,40 @@ function App({
 
   const [show, setShow] = useState(shouldBannerBeShown());
 
+  const writeConsentCookie = () => {
+    const cookieValue = buildConsentCookieValue(cookieStates);
+    const options = {
+      domain: SHARED_COOKIE_DOMAIN,
+      expires: 365,
+      path: '/',
+      sameSite: 'Lax',
+      secure: window.location.protocol === 'https:',
+    };
+
+    Cookies.set(cookieConsentName, cookieValue, options);
+    // Keep legacy key in sync until all consumers fully migrate.
+    Cookies.set(LEGACY_COOKIE_CONSENT_NAME, cookieValue, options);
+  };
+
   const cookieAcceptanceUpdate = (isAccepted, cookieVarName) => {
     $.ajax({
       type: 'POST',
       url: `${BACKEND_URL}/cookies/${isAccepted ? 'accept' : 'decline'
         }/${cookieVarName}/`,
+      crossDomain: true,
+      xhrFields: {
+        withCredentials: true,
+      },
       headers: {
         'X-CSRFToken': Cookies.get('csrftoken'),
       },
       data: {},
       success: () => {
-        console.log('Operation suceeded');
+        console.log('Operation succeeded');
       },
       error: () => {
-        console.log('Operation failed');
+        // Keep UI state consistent even if backend cookie write fails.
+        console.log('Operation failed, using frontend consent cookie fallback');
       },
     });
     const group = cookieGroups.filter(
@@ -60,6 +85,8 @@ function App({
     if (isAccepted) {
       acceptAndInjectScripts(group_id, cookieSets);
     }
+
+    writeConsentCookie();
   };
 
   const declineAllNonEssentialCookies = () => {
@@ -82,9 +109,11 @@ function App({
 
   const onExit = () => {
     Cookies.set(SHOW_BANNER_COOKIE_NAME, '1', {
-      domain: '.little-world.com',
+      domain: SHARED_COOKIE_DOMAIN,
       expires: 30 /** cookie valid for 30 days then the cookie banner is shown again regardless */,
       path: '/',
+      sameSite: 'Lax',
+      secure: window.location.protocol === 'https:',
     });
     declineAllNonEssentialCookies();
     setShow(false);
@@ -92,9 +121,11 @@ function App({
 
   const onAccept = () => {
     Cookies.set(SHOW_BANNER_COOKIE_NAME, '1', {
-      domain: '.little-world.com',
+      domain: SHARED_COOKIE_DOMAIN,
       expires: 30 /** cookie valid for 30 days then the cookie banner is shown again regardless */,
       path: '/',
+      sameSite: 'Lax',
+      secure: window.location.protocol === 'https:',
     });
     acceptAllNonEssentialCookies();
     setShow(false);
