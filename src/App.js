@@ -21,6 +21,8 @@ const buildConsentCookieValue = (states = {}) =>
     .map(([key, value]) => `${key}=${value}`)
     .join('|');
 
+const normalizeConsentCookieValue = value => (value || '').replace(/^"+|"+$/g, '');
+
 const shouldBannerBeShown = () => {
   const cookieValue = Cookies.get(SHOW_BANNER_COOKIE_NAME);
   return cookieValue === undefined ? true : false;
@@ -40,7 +42,7 @@ function App({
   const [show, setShow] = useState(shouldBannerBeShown());
 
   const writeConsentCookie = () => {
-    const cookieValue = buildConsentCookieValue(cookieStates);
+    const cookieValue = normalizeConsentCookieValue(buildConsentCookieValue(cookieStates));
     const options = {
       domain: SHARED_COOKIE_DOMAIN,
       expires: 365,
@@ -50,8 +52,6 @@ function App({
     };
 
     Cookies.set(cookieConsentName, cookieValue, options);
-    // Keep legacy key in sync until all consumers fully migrate.
-    Cookies.set(LEGACY_COOKIE_CONSENT_NAME, cookieValue, options);
   };
 
   const cookieAcceptanceUpdate = (isAccepted, cookieVarName) => {
@@ -132,13 +132,28 @@ function App({
   };
 
   useEffect(() => {
+    // Ensure deprecated consent key is cleaned up everywhere.
+    Cookies.remove(LEGACY_COOKIE_CONSENT_NAME, { path: '/' });
+    Cookies.remove(LEGACY_COOKIE_CONSENT_NAME, {
+      domain: SHARED_COOKIE_DOMAIN,
+      path: '/',
+    });
+
     if (cookieStates === null || Object.keys(cookieStates).length === 0) {
       //Means we should determine the state our selfs
       const current_accept_state =
-        Cookies.get(cookieConsentName)
-        || Cookies.get(LEGACY_COOKIE_CONSENT_NAME)
-        || '';
-      const normalized_accept_state = current_accept_state.replace(/^"|"$/g, '');
+        Cookies.get(cookieConsentName) || '';
+      const normalized_accept_state = normalizeConsentCookieValue(current_accept_state);
+
+      if (current_accept_state !== normalized_accept_state) {
+        Cookies.set(cookieConsentName, normalized_accept_state, {
+          domain: SHARED_COOKIE_DOMAIN,
+          expires: 365,
+          path: '/',
+          sameSite: 'Lax',
+          secure: window.location.protocol === 'https:',
+        });
+      }
 
       if (normalized_accept_state === '') {
         cookieStates = {};
