@@ -173,12 +173,13 @@ function App({
     Object.keys(cookieStates).forEach(set => {
       if (cookieStates[set] !== '-1') {
         const group = cookieGroups.filter(g => g.fields.varname === set)[0];
+        if (!group) return;
 
         const group_id = group.pk;
         acceptAndInjectScripts(group_id, cookieSets);
       }
     });
-  });
+  }, [cookieConsentName, cookieGroups, cookieSets]);
 
   return (
     <>

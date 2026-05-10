@@ -1,4 +1,9 @@
 export const addScriptSrcToDom = (scriptSrc, id) => {
+  if (/[?&]noscript=1(?:&|$)/i.test(scriptSrc)) {
+    // `noscript=1` endpoints are tracking pixel fallbacks, not executable JS.
+    return;
+  }
+
   const script = document.createElement('script');
   script.async = true;
   script.id = id;
@@ -8,8 +13,7 @@ export const addScriptSrcToDom = (scriptSrc, id) => {
 
 export const addScriptToDom = (scriptString, id) => {
   const script = document.createElement('script');
-  document.head.appendChild(script);
-  var inlineScript = document.createTextNode(scriptString);
+  const inlineScript = document.createTextNode(scriptString);
   script.appendChild(inlineScript);
   script.async = true;
   script.id = id;
