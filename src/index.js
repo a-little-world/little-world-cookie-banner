@@ -26,7 +26,7 @@ i18n.use(initReactI18next).init({
           'Die Einstellungen für Cookies können Sie jederzeit aufrufen und diese auch nachträglich abwählen.',
         declineButton: 'Alle ablehnen',
         acceptButton: 'Alle akzeptieren',
-        moreOptions: 'Weitere Optionen',
+        cookieSettings: 'Cookie-Einstellungen',
         impressum: 'Impressum',
         dataPrivacy: 'Datenschutz',
       },
