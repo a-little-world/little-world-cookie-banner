@@ -163,25 +163,13 @@ function App({
   };
 
   const onExit = () => {
-    Cookies.set(SHOW_BANNER_COOKIE_NAME, '1', {
-      domain: SHARED_COOKIE_DOMAIN,
-      expires: 30 /** cookie valid for 30 days then the cookie banner is shown again regardless */,
-      path: '/',
-      sameSite: 'Lax',
-      secure: window.location.protocol === 'https:',
-    });
+    markSelectionDone();
     declineAllNonEssentialCookies();
     setShow(false);
   };
 
   const onAccept = () => {
-    Cookies.set(SHOW_BANNER_COOKIE_NAME, '1', {
-      domain: SHARED_COOKIE_DOMAIN,
-      expires: 30 /** cookie valid for 30 days then the cookie banner is shown again regardless */,
-      path: '/',
-      sameSite: 'Lax',
-      secure: window.location.protocol === 'https:',
-    });
+    markSelectionDone();
     acceptAllNonEssentialCookies();
     setShow(false);
   };
