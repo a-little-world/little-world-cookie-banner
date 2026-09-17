@@ -17,7 +17,11 @@ const StyledButton = styled.button`
 
 const OpenBannerButton = ({ onClick }) => {
   return (
-    <StyledButton className="bloo-balh" onClick={onClick}>
+    <StyledButton
+      className="bloo-balh"
+      data-testid="cookie-banner-open-button"
+      onClick={onClick}
+    >
       <CookieBig />
     </StyledButton>
   );
