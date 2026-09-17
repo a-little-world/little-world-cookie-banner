@@ -28,6 +28,9 @@ const shouldBannerBeShown = () => {
   return cookieValue === undefined ? true : false;
 };
 
+const hasLegacyConsentSelection = () =>
+  normalizeConsentCookieValue(Cookies.get(LEGACY_COOKIE_CONSENT_NAME)) !== '';
+
 function App({
   cookieGroups,
   cookieSets,
@@ -39,7 +42,27 @@ function App({
 }) {
   const styles = indexCSS; // All merged styles ( neeed to be included like this since we are using a shadow dom )
 
-  const [show, setShow] = useState(shouldBannerBeShown());
+  const hasStoredConsentSelection = () =>
+    hasLegacyConsentSelection() ||
+    normalizeConsentCookieValue(Cookies.get(cookieConsentName)) !== '' ||
+    (cookieStates !== null &&
+      cookieStates !== undefined &&
+      Object.keys(cookieStates).length > 0);
+
+  const writeSelectionDoneCookie = () => {
+    Cookies.set(SHOW_BANNER_COOKIE_NAME, '1', {
+      domain: SHARED_COOKIE_DOMAIN,
+      expires: 30 /** cookie valid for 30 days then the cookie banner is shown again regardless */,
+      path: '/',
+      sameSite: 'Lax',
+      secure: window.location.protocol === 'https:',
+    });
+  };
+
+  // Do not re-prompt users who already selected their cookies in a previous implementation.
+  const [show, setShow] = useState(
+    () => shouldBannerBeShown() && !hasStoredConsentSelection(),
+  );
 
   const writeConsentCookie = () => {
     const cookieValue = normalizeConsentCookieValue(buildConsentCookieValue(cookieStates));
@@ -79,6 +102,12 @@ function App({
       g => g.fields.varname === cookieVarName,
     )[0];
 
+    if (!group) {
+      // A missing group must not strand the consent flow (and with it the banner).
+      writeConsentCookie();
+      return;
+    }
+
     const group_id = group.pk;
     cookieStates[cookieVarName] = isAccepted ? group.fields.created : '-1';
 
@@ -108,30 +137,34 @@ function App({
   };
 
   const onExit = () => {
-    Cookies.set(SHOW_BANNER_COOKIE_NAME, '1', {
-      domain: SHARED_COOKIE_DOMAIN,
-      expires: 30 /** cookie valid for 30 days then the cookie banner is shown again regardless */,
-      path: '/',
-      sameSite: 'Lax',
-      secure: window.location.protocol === 'https:',
-    });
-    declineAllNonEssentialCookies();
-    setShow(false);
+    try {
+      writeSelectionDoneCookie();
+      declineAllNonEssentialCookies();
+    } catch (e) {
+      console.error('Failed to persist cookie decline', e);
+    } finally {
+      setShow(false);
+    }
   };
 
   const onAccept = () => {
-    Cookies.set(SHOW_BANNER_COOKIE_NAME, '1', {
-      domain: SHARED_COOKIE_DOMAIN,
-      expires: 30 /** cookie valid for 30 days then the cookie banner is shown again regardless */,
-      path: '/',
-      sameSite: 'Lax',
-      secure: window.location.protocol === 'https:',
-    });
-    acceptAllNonEssentialCookies();
-    setShow(false);
+    try {
+      writeSelectionDoneCookie();
+      acceptAllNonEssentialCookies();
+    } catch (e) {
+      console.error('Failed to persist cookie acceptance', e);
+    } finally {
+      setShow(false);
+    }
   };
 
   useEffect(() => {
+    // Users from the previous implementation already selected their cookies, so migrate
+    // them to the current marker instead of prompting them again.
+    if (shouldBannerBeShown() && hasStoredConsentSelection()) {
+      writeSelectionDoneCookie();
+    }
+
     // Ensure deprecated consent key is cleaned up everywhere.
     Cookies.remove(LEGACY_COOKIE_CONSENT_NAME, { path: '/' });
     Cookies.remove(LEGACY_COOKIE_CONSENT_NAME, {
