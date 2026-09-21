@@ -145,7 +145,7 @@ const Actions = styled.div`
   display: flex;
   flex-wrap: wrap;
   gap: 12px;
-  justify-content: center;
+  justify-content: flex-end;
   margin-top: 8px;
 `;
 
@@ -221,7 +221,9 @@ const CookieGroupCard = ({ group, checked, onToggle }) => {
             {group.cookies.map(cookie => (
               <CookieItem key={`${cookie.name}-${cookie.domain}${cookie.path}`}>
                 <div>{cookie.name}</div>
-                {cookie.description && <CookieMeta>{cookie.description}</CookieMeta>}
+                {cookie.description && (
+                  <CookieMeta>{cookie.description}</CookieMeta>
+                )}
                 <CookieMeta>
                   {cookie.domain}
                   {cookie.path}
