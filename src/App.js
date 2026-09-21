@@ -27,9 +27,6 @@ const normalizeConsentCookieValue = value => (value || '').replace(/^"+|"+$/g, '
 const isAcceptedState = value =>
   value !== undefined && value !== null && value !== '' && value !== '-1';
 
-const shouldOpenSettings = () =>
-  typeof window !== 'undefined' && window.__lwOpenCookieSettings === true;
-
 const shouldBannerBeShown = () => {
   const cookieValue = Cookies.get(SHOW_BANNER_COOKIE_NAME);
   return cookieValue === undefined ? true : false;
@@ -64,16 +61,8 @@ function App({
         name: group.fields.name,
         description: group.fields.description,
         required: group.fields.is_required,
-        cookies: (cookieSets || [])
-          .filter(cookie => cookie.fields.cookiegroup === group.pk)
-          .map(cookie => ({
-            name: cookie.fields.name,
-            description: cookie.fields.description,
-            domain: cookie.fields.domain,
-            path: cookie.fields.path,
-          })),
       })),
-    [cookieGroups, cookieSets],
+    [cookieGroups],
   );
 
   const buildPreferences = () => {
@@ -84,9 +73,8 @@ function App({
     return next;
   };
 
-  const openSettingsInitially = shouldOpenSettings();
-  const [show, setShow] = useState(openSettingsInitially ? true : shouldBannerBeShown());
-  const [view, setView] = useState(openSettingsInitially ? 'settings' : 'banner');
+  const [show, setShow] = useState(shouldBannerBeShown());
+  const [view, setView] = useState('banner');
   const [preferences, setPreferences] = useState(buildPreferences);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -234,8 +222,7 @@ function App({
   };
 
   useEffect(() => {
-    // Allow any page (e.g. the dedicated /cookies page or an external trigger)
-    // to open the settings view of this banner.
+    // Allow the host page to open the settings view of this banner.
     window.openCookieSettings = openSettings;
   });
 

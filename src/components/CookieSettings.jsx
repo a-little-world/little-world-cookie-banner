@@ -62,23 +62,16 @@ const GroupDescription = styled.p`
   color: #4a5568;
   font-size: 13px;
   line-height: 18px;
-  margin: 8px 0 12px;
+  margin: 8px 0 0;
 `;
 
-const ToggleRow = styled.label`
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  cursor: pointer;
-  font-size: 14px;
-`;
-
-const Toggle = styled.span`
+const Toggle = styled.label`
   position: relative;
   display: inline-block;
   width: 46px;
   height: 26px;
   flex-shrink: 0;
+  cursor: pointer;
 `;
 
 const ToggleInput = styled.input`
@@ -92,10 +85,6 @@ const ToggleInput = styled.input`
 
   &:checked + span::before {
     transform: translateX(20px);
-  }
-
-  &:disabled + span {
-    opacity: 0.6;
   }
 `;
 
@@ -117,28 +106,6 @@ const ToggleSlider = styled.span`
     border-radius: 50%;
     transition: transform 0.2s ease;
   }
-`;
-
-const CookieSummary = styled.summary`
-  cursor: pointer;
-  color: #0063af;
-  font-size: 13px;
-  margin-top: 12px;
-`;
-
-const CookieList = styled.ul`
-  margin: 10px 0 0;
-  padding-left: 18px;
-  font-size: 12px;
-  color: #4a5568;
-`;
-
-const CookieItem = styled.li`
-  margin-bottom: 8px;
-`;
-
-const CookieMeta = styled.div`
-  color: #718096;
 `;
 
 const Actions = styled.div`
@@ -198,41 +165,22 @@ const CookieGroupCard = ({ group, checked, onToggle }) => {
     <GroupCard>
       <GroupHeader>
         <GroupName>{name}</GroupName>
-        {group.required && <RequiredTag>{t('requiredBadge')}</RequiredTag>}
+        {group.required ? (
+          <RequiredTag>{t('requiredBadge')}</RequiredTag>
+        ) : (
+          <Toggle>
+            <ToggleInput
+              type="checkbox"
+              name={group.varname}
+              aria-label={name}
+              checked={checked}
+              onChange={event => onToggle(group.varname, event.target.checked)}
+            />
+            <ToggleSlider />
+          </Toggle>
+        )}
       </GroupHeader>
       {description && <GroupDescription>{description}</GroupDescription>}
-      <ToggleRow>
-        <span>{t('toggleLabel')}</span>
-        <Toggle>
-          <ToggleInput
-            type="checkbox"
-            name={group.varname}
-            checked={group.required ? true : checked}
-            disabled={group.required}
-            onChange={event => onToggle(group.varname, event.target.checked)}
-          />
-          <ToggleSlider />
-        </Toggle>
-      </ToggleRow>
-      {group.cookies.length > 0 && (
-        <details>
-          <CookieSummary>{t('showCookies')}</CookieSummary>
-          <CookieList>
-            {group.cookies.map(cookie => (
-              <CookieItem key={`${cookie.name}-${cookie.domain}${cookie.path}`}>
-                <div>{cookie.name}</div>
-                {cookie.description && (
-                  <CookieMeta>{cookie.description}</CookieMeta>
-                )}
-                <CookieMeta>
-                  {cookie.domain}
-                  {cookie.path}
-                </CookieMeta>
-              </CookieItem>
-            ))}
-          </CookieList>
-        </details>
-      )}
     </GroupCard>
   );
 };

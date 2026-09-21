@@ -32,17 +32,15 @@ i18n.use(initReactI18next).init({
         dataPrivacy: 'Datenschutz',
         settingsTitle: 'Cookie-Einstellungen',
         settingsIntro:
-          'Hier können Sie auswählen, welche Cookies wir verwenden dürfen. Notwendige Cookies sind für den Betrieb der Seite erforderlich und können nicht deaktiviert werden.',
+          'Hier können Sie auswählen, welche Cookies wir verwenden dürfen.',
         requiredBadge: 'Immer aktiv',
-        toggleLabel: 'Aktiviert',
-        showCookies: 'Details anzeigen',
         saveButton: 'Einstellungen speichern',
         back: 'Zurück',
         saved: 'Einstellungen erfolgreich gespeichert',
         saveError: 'Einstellungen konnten nicht gespeichert werden.',
         'groups.analytics.name': 'Statistik',
         'groups.analytics.description':
-          'Google Analytics und Facebook Pixel helfen uns zu verstehen, wie unsere Seite genutzt wird.',
+          'Google und Facebook Analytics helfen uns zu verstehen, wie unsere Seite genutzt wird.',
         'groups.lw_func_cookies.name': 'Notwendige Cookies',
         'groups.lw_func_cookies.description':
           'Diese Cookies sind für die grundlegende Funktionalität von Little World erforderlich.',
@@ -52,14 +50,18 @@ i18n.use(initReactI18next).init({
       translation: {
         title: 'Cookie settings',
         paragraph1: 'We use cookies and data to ',
-        listItem1: 'enable sign-up, registration and secure use of Little World',
+        listItem1:
+          'enable sign-up, registration and secure use of Little World',
         listItem2: 'manage cookie consents.',
         listItem3: 'display different languages.',
-        paragraph2: 'If you select "Accept all", we also use cookies and data to',
+        paragraph2:
+          'If you select "Accept all", we also use cookies and data to',
         listItem4: 'statistically analyse how our website is used.',
         listItem5: 'improve our public outreach.',
-        disclaimer1: 'If you select "Decline all", we do not use cookies for these additional purposes.',
-        disclaimer2: 'You can open the cookie settings at any time and change them afterwards.',
+        disclaimer1:
+          'If you select "Decline all", we do not use cookies for these additional purposes.',
+        disclaimer2:
+          'You can open the cookie settings at any time and change them afterwards.',
         declineButton: 'Decline all',
         acceptButton: 'Accept all',
         cookieSettings: 'Cookie settings',
@@ -67,18 +69,15 @@ i18n.use(initReactI18next).init({
         impressum: 'Imprint',
         dataPrivacy: 'Privacy',
         settingsTitle: 'Cookie settings',
-        settingsIntro:
-          'Here you can choose which cookies we may use. Necessary cookies are required for the site to work and cannot be disabled.',
+        settingsIntro: 'Choose which cookies we may use.',
         requiredBadge: 'Always active',
-        toggleLabel: 'Enabled',
-        showCookies: 'Show details',
         saveButton: 'Save settings',
         back: 'Back',
         saved: 'Settings saved successfully',
         saveError: 'Could not save the settings.',
         'groups.analytics.name': 'Statistics',
         'groups.analytics.description':
-          'Google Analytics and Facebook Pixel help us understand how our site is used.',
+          'Google and Facebook Analytics help us understand how our site is used.',
         'groups.lw_func_cookies.name': 'Necessary cookies',
         'groups.lw_func_cookies.description':
           'These cookies are required for the basic functionality of Little World.',
@@ -87,7 +86,9 @@ i18n.use(initReactI18next).init({
   },
   lng:
     typeof document !== 'undefined' &&
-    (document.documentElement.getAttribute('lang') || '').toLowerCase().startsWith('en')
+    (document.documentElement.getAttribute('lang') || '')
+      .toLowerCase()
+      .startsWith('en')
       ? 'en'
       : 'de',
   fallbackLng: 'de',
