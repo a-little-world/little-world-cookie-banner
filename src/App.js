@@ -51,8 +51,8 @@ function App({
   cookieSets,
   cookieStates,
   cookieConsentName = 'backend_cookie_consent',
-  toImpressumFunc,
-  toPrivacyFunc,
+  impressumUrl,
+  privacyUrl,
   cookieBannerIsHidden,
 }) {
   const styles = indexCSS; // All merged styles ( neeed to be included like this since we are using a shadow dom )
@@ -312,8 +312,8 @@ function App({
               <CookieBanner
                 onExit={onExit}
                 onAccept={onAccept}
-                toImpressumFunc={toImpressumFunc}
-                toPrivacyFunc={toPrivacyFunc}
+                impressumUrl={impressumUrl}
+                privacyUrl={privacyUrl}
                 onOpenSettings={openSettings}
               />
             )}

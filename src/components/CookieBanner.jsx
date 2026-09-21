@@ -134,9 +134,15 @@ const MoreOptions = styled.button`
   }
 `;
 
-const CookieBanner = ({ onAccept, onExit, toImpressumFunc, toPrivacyFunc, onOpenSettings }) => {
+const CookieBanner = ({
+  onAccept,
+  onExit,
+  impressumUrl,
+  privacyUrl,
+  onOpenSettings,
+}) => {
   const { t } = useTranslation();
-  
+
   return (
     <Container>
       <ImageWrapper>
@@ -171,8 +177,12 @@ const CookieBanner = ({ onAccept, onExit, toImpressumFunc, toPrivacyFunc, onOpen
           <MoreOptions type="button" onClick={onOpenSettings}>
             {t('cookieSettings')}
           </MoreOptions>
-          <button onClick={toImpressumFunc}>{t('impressum')}</button>
-          <button onClick={toPrivacyFunc}>{t('dataPrivacy')}</button>
+          <a href={impressumUrl} target="_blank" rel="noopener noreferrer">
+            {t('impressum')}
+          </a>
+          <a href={privacyUrl} target="_blank" rel="noopener noreferrer">
+            {t('dataPrivacy')}
+          </a>
         </Options>
       </TextSection>
     </Container>

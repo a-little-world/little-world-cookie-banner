@@ -101,8 +101,8 @@ const renderApp = (
   cookieGroupsJSON,
   cookieSetsJSON,
   cookieStateDictJSON,
-  toImpressumFunc,
-  toPrivacyFunc,
+  impressumUrl,
+  privacyUrl,
   cookieBannerIsHidden = false,
   scriptsToAdd = {},
   cookieConsentName = 'backend_cookie_consent',
@@ -129,8 +129,8 @@ const renderApp = (
           cookieSets={JSON.parse(cookieSetsJSON)}
           cookieStates={cookieStateDictJSON}
           cookieConsentName={cookieConsentName}
-          toImpressumFunc={toImpressumFunc}
-          toPrivacyFunc={toPrivacyFunc}
+          impressumUrl={impressumUrl}
+          privacyUrl={privacyUrl}
           cookieBannerIsHidden={cookieBannerIsHidden}
           cookieScriptMap={scriptsToAdd}
         />
