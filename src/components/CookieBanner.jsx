@@ -102,12 +102,14 @@ const Options = styled.div`
   align-items: center;
   justify-content: center;
   flex-wrap: wrap;
+  gap: 10px;
 
-  > button {
+  > button,
+  > a {
     font-size: 14px;
 
     &:first-of-type {
-      margin-right: 29px;
+      margin-right: 10px;
     }
   }
 
