@@ -194,7 +194,6 @@ const CookieSettings = ({
   onSave,
   onBack,
   saving,
-  saved,
   saveFailed,
 }) => {
   const { t } = useTranslation();
@@ -214,7 +213,6 @@ const CookieSettings = ({
           onToggle={onToggle}
         />
       ))}
-      {saved && <Feedback>{t('saved')}</Feedback>}
       {saveFailed && <Feedback $error>{t('saveError')}</Feedback>}
       <Actions>
         <SecondaryButton type="button" onClick={onDeclineAll} disabled={saving}>

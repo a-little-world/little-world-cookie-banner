@@ -36,7 +36,6 @@ i18n.use(initReactI18next).init({
         requiredBadge: 'Immer aktiv',
         saveButton: 'Einstellungen speichern',
         back: 'Zurück',
-        saved: 'Einstellungen erfolgreich gespeichert',
         saveError: 'Einstellungen konnten nicht gespeichert werden.',
         'groups.analytics.name': 'Statistik',
         'groups.analytics.description':
@@ -73,7 +72,6 @@ i18n.use(initReactI18next).init({
         requiredBadge: 'Always active',
         saveButton: 'Save settings',
         back: 'Back',
-        saved: 'Settings saved successfully',
         saveError: 'Could not save the settings.',
         'groups.analytics.name': 'Statistics',
         'groups.analytics.description':

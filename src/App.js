@@ -77,7 +77,6 @@ function App({
   const [view, setView] = useState('banner');
   const [preferences, setPreferences] = useState(buildPreferences);
   const [saving, setSaving] = useState(false);
-  const [saved, setSaved] = useState(false);
   const [saveFailed, setSaveFailed] = useState(false);
 
   const markSelectionDone = () => {
@@ -164,14 +163,12 @@ function App({
 
   const openSettings = () => {
     setPreferences(buildPreferences());
-    setSaved(false);
     setSaveFailed(false);
     setView('settings');
     setShow(true);
   };
 
   const handleToggle = (varname, value) => {
-    setSaved(false);
     setSaveFailed(false);
     setPreferences(current => ({ ...current, [varname]: value }));
   };
@@ -191,7 +188,8 @@ function App({
     setSaving(true);
     try {
       applyPreferences(preferences);
-      setSaved(true);
+      setView('banner');
+      setShow(false);
     } catch (e) {
       setSaveFailed(true);
     } finally {
@@ -292,7 +290,6 @@ function App({
                 onSave={onSave}
                 onBack={() => setView('banner')}
                 saving={saving}
-                saved={saved}
                 saveFailed={saveFailed}
               />
             ) : (
