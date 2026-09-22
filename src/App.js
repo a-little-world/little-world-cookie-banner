@@ -4,7 +4,7 @@ import {
 } from '@a-little-world/little-world-design-system';
 import $ from 'jquery';
 import Cookies from 'js-cookie';
-import React, { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 import { BACKEND_URL } from './ENVIRONMENT';
 import CookieBanner from './components/CookieBanner';
@@ -22,7 +22,8 @@ const buildConsentCookieValue = (states = {}) =>
     .map(([key, value]) => `${key}=${value}`)
     .join('|');
 
-const normalizeConsentCookieValue = value => (value || '').replace(/^"+|"+$/g, '');
+const normalizeConsentCookieValue = value =>
+  (value || '').replace(/^"+|"+$/g, '');
 
 const isAcceptedState = value =>
   value !== undefined && value !== null && value !== '' && value !== '-1';
@@ -33,7 +34,8 @@ const shouldBannerBeShown = () => {
 };
 
 const selectionDoneCookieOptions = () => {
-  const isProductionHost = window.location.hostname.endsWith('little-world.com');
+  const isProductionHost =
+    window.location.hostname.endsWith('little-world.com');
   return {
     domain: isProductionHost ? SHARED_COOKIE_DOMAIN : undefined,
     expires: 30 /** cookie valid for 30 days then the cookie banner is shown again regardless */,
@@ -42,6 +44,9 @@ const selectionDoneCookieOptions = () => {
     secure: window.location.protocol === 'https:',
   };
 };
+
+const hasLegacyConsentSelection = () =>
+  normalizeConsentCookieValue(Cookies.get(LEGACY_COOKIE_CONSENT_NAME)) !== '';
 
 function App({
   cookieGroups,
@@ -68,12 +73,24 @@ function App({
   const buildPreferences = () => {
     const next = {};
     normalizedGroups.forEach(group => {
-      next[group.varname] = group.required ? true : isAcceptedState((cookieStates || {})[group.varname]);
+      next[group.varname] = group.required
+        ? true
+        : isAcceptedState((cookieStates || {})[group.varname]);
     });
     return next;
   };
 
-  const [show, setShow] = useState(shouldBannerBeShown());
+  const hasStoredConsentSelection = () =>
+    hasLegacyConsentSelection() ||
+    normalizeConsentCookieValue(Cookies.get(cookieConsentName)) !== '' ||
+    (cookieStates !== null &&
+      cookieStates !== undefined &&
+      Object.keys(cookieStates).length > 0);
+
+  // Do not re-prompt users who already selected their cookies in a previous implementation.
+  const [show, setShow] = useState(
+    () => shouldBannerBeShown() && !hasStoredConsentSelection(),
+  );
   const [view, setView] = useState('banner');
   const [preferences, setPreferences] = useState(buildPreferences);
   const [saving, setSaving] = useState(false);
@@ -84,7 +101,9 @@ function App({
   };
 
   const writeConsentCookie = () => {
-    const cookieValue = normalizeConsentCookieValue(buildConsentCookieValue(cookieStates));
+    const cookieValue = normalizeConsentCookieValue(
+      buildConsentCookieValue(cookieStates),
+    );
     const options = {
       domain: SHARED_COOKIE_DOMAIN,
       expires: 365,
@@ -99,8 +118,9 @@ function App({
   const cookieAcceptanceUpdate = (isAccepted, cookieVarName) => {
     $.ajax({
       type: 'POST',
-      url: `${BACKEND_URL}/cookies/${isAccepted ? 'accept' : 'decline'
-        }/${cookieVarName}/`,
+      url: `${BACKEND_URL}/cookies/${
+        isAccepted ? 'accept' : 'decline'
+      }/${cookieVarName}/`,
       crossDomain: true,
       xhrFields: {
         withCredentials: true,
@@ -120,6 +140,12 @@ function App({
     const group = cookieGroups.filter(
       g => g.fields.varname === cookieVarName,
     )[0];
+
+    if (!group) {
+      // A missing group must not strand the consent flow (and with it the banner).
+      writeConsentCookie();
+      return;
+    }
 
     const group_id = group.pk;
     cookieStates[cookieVarName] = isAccepted ? group.fields.created : '-1';
@@ -150,15 +176,25 @@ function App({
   };
 
   const onExit = () => {
-    markSelectionDone();
-    declineAllNonEssentialCookies();
-    setShow(false);
+    try {
+      markSelectionDone();
+      declineAllNonEssentialCookies();
+    } catch (e) {
+      console.error('Failed to persist cookie decline', e);
+    } finally {
+      setShow(false);
+    }
   };
 
   const onAccept = () => {
-    markSelectionDone();
-    acceptAllNonEssentialCookies();
-    setShow(false);
+    try {
+      markSelectionDone();
+      acceptAllNonEssentialCookies();
+    } catch (e) {
+      console.error('Failed to persist cookie acceptance', e);
+    } finally {
+      setShow(false);
+    }
   };
 
   const openSettings = () => {
@@ -225,6 +261,12 @@ function App({
   });
 
   useEffect(() => {
+    // Users from the previous implementation already selected their cookies, so migrate
+    // them to the current marker instead of prompting them again.
+    if (shouldBannerBeShown() && hasStoredConsentSelection()) {
+      markSelectionDone();
+    }
+
     // Ensure deprecated consent key is cleaned up everywhere.
     Cookies.remove(LEGACY_COOKIE_CONSENT_NAME, { path: '/' });
     Cookies.remove(LEGACY_COOKIE_CONSENT_NAME, {
@@ -234,9 +276,9 @@ function App({
 
     if (cookieStates === null || Object.keys(cookieStates).length === 0) {
       //Means we should determine the state our selfs
-      const current_accept_state =
-        Cookies.get(cookieConsentName) || '';
-      const normalized_accept_state = normalizeConsentCookieValue(current_accept_state);
+      const current_accept_state = Cookies.get(cookieConsentName) || '';
+      const normalized_accept_state =
+        normalizeConsentCookieValue(current_accept_state);
 
       if (current_accept_state !== normalized_accept_state) {
         Cookies.set(cookieConsentName, normalized_accept_state, {
@@ -279,7 +321,12 @@ function App({
       {cookieBannerIsHidden ? null : (
         <CustomThemeProvider>
           <style>{styles}</style>
-          <Modal open={show} onClose={() => setShow(false)} createInPortal={false} locked>
+          <Modal
+            open={show}
+            onClose={() => setShow(false)}
+            createInPortal={false}
+            locked
+          >
             {view === 'settings' ? (
               <CookieSettings
                 groups={normalizedGroups}
