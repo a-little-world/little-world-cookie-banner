@@ -10,7 +10,10 @@ import { BACKEND_URL } from './ENVIRONMENT';
 import CookieBanner from './components/CookieBanner';
 import CookieSettings from './components/CookieSettings';
 import OpenBannerButton from './components/OpenBannerButton';
-import { acceptAndInjectScripts } from './cookieTagInsertionLib';
+import {
+  acceptAndInjectScripts,
+  removeInjectedScripts,
+} from './cookieTagInsertionLib';
 import { indexCSS } from './styles';
 
 const SHOW_BANNER_COOKIE_NAME = 'cookieSelectionDone';
@@ -152,6 +155,8 @@ function App({
 
     if (isAccepted) {
       acceptAndInjectScripts(group_id, cookieSets);
+    } else {
+      removeInjectedScripts(group_id);
     }
 
     writeConsentCookie();
