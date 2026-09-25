@@ -26,13 +26,69 @@ i18n.use(initReactI18next).init({
           'Die Einstellungen für Cookies können Sie jederzeit aufrufen und diese auch nachträglich abwählen.',
         declineButton: 'Alle ablehnen',
         acceptButton: 'Alle akzeptieren',
+        cookieSettings: 'Cookie-Einstellungen',
         moreOptions: 'Weitere Optionen',
         impressum: 'Impressum',
         dataPrivacy: 'Datenschutz',
+        settingsTitle: 'Cookie-Einstellungen',
+        settingsIntro:
+          'Hier können Sie auswählen, welche Cookies wir verwenden dürfen.',
+        requiredBadge: 'Immer aktiv',
+        saveButton: 'Einstellungen speichern',
+        back: 'Zurück',
+        saveError: 'Einstellungen konnten nicht gespeichert werden.',
+        'groups.analytics.name': 'Statistik',
+        'groups.analytics.description':
+          'Google und Facebook Analytics helfen uns zu verstehen, wie unsere Seite genutzt wird.',
+        'groups.lw_func_cookies.name': 'Notwendige Cookies',
+        'groups.lw_func_cookies.description':
+          'Diese Cookies sind für die grundlegende Funktionalität von Little World erforderlich.',
+      },
+    },
+    en: {
+      translation: {
+        title: 'Cookie settings',
+        paragraph1: 'We use cookies and data to ',
+        listItem1:
+          'enable sign-up, registration and secure use of Little World',
+        listItem2: 'manage cookie consents.',
+        listItem3: 'display different languages.',
+        paragraph2:
+          'If you select "Accept all", we also use cookies and data to',
+        listItem4: 'statistically analyse how our website is used.',
+        listItem5: 'improve our public outreach.',
+        disclaimer1:
+          'If you select "Decline all", we do not use cookies for these additional purposes.',
+        disclaimer2:
+          'You can open the cookie settings at any time and change them afterwards.',
+        declineButton: 'Decline all',
+        acceptButton: 'Accept all',
+        cookieSettings: 'Cookie settings',
+        moreOptions: 'More options',
+        impressum: 'Imprint',
+        dataPrivacy: 'Privacy',
+        settingsTitle: 'Cookie settings',
+        settingsIntro: 'Choose which cookies we may use.',
+        requiredBadge: 'Always active',
+        saveButton: 'Save settings',
+        back: 'Back',
+        saveError: 'Could not save the settings.',
+        'groups.analytics.name': 'Statistics',
+        'groups.analytics.description':
+          'Google and Facebook Analytics help us understand how our site is used.',
+        'groups.lw_func_cookies.name': 'Necessary cookies',
+        'groups.lw_func_cookies.description':
+          'These cookies are required for the basic functionality of Little World.',
       },
     },
   },
-  lng: 'de',
+  lng:
+    typeof document !== 'undefined' &&
+    (document.documentElement.getAttribute('lang') || '')
+      .toLowerCase()
+      .startsWith('en')
+      ? 'en'
+      : 'de',
   fallbackLng: 'de',
 
   interpolation: {
@@ -44,8 +100,8 @@ const renderApp = (
   cookieGroupsJSON,
   cookieSetsJSON,
   cookieStateDictJSON,
-  toImpressumFunc,
-  toPrivacyFunc,
+  impressumUrl,
+  privacyUrl,
   cookieBannerIsHidden = false,
   scriptsToAdd = {},
   cookieConsentName = 'backend_cookie_consent',
@@ -72,8 +128,8 @@ const renderApp = (
           cookieSets={JSON.parse(cookieSetsJSON)}
           cookieStates={cookieStateDictJSON}
           cookieConsentName={cookieConsentName}
-          toImpressumFunc={toImpressumFunc}
-          toPrivacyFunc={toPrivacyFunc}
+          impressumUrl={impressumUrl}
+          privacyUrl={privacyUrl}
           cookieBannerIsHidden={cookieBannerIsHidden}
           cookieScriptMap={scriptsToAdd}
         />

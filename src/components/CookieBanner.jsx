@@ -102,12 +102,14 @@ const Options = styled.div`
   align-items: center;
   justify-content: center;
   flex-wrap: wrap;
+  gap: 10px;
 
-  > button {
+  > button,
+  > a {
     font-size: 14px;
 
     &:first-of-type {
-      margin-right: 29px;
+      margin-right: 10px;
     }
   }
 
@@ -116,7 +118,7 @@ const Options = styled.div`
   }
 `;
 
-const MoreOptions = styled.a`
+const MoreOptions = styled.button`
   background: linear-gradient(50.19deg, #36a9e0 2.84%, #0367b2 106.82%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -125,6 +127,7 @@ const MoreOptions = styled.a`
   margin-bottom: 29px;
   flex-basis: 100%;
   text-align: center;
+  font-size: 14px;
 
   @media ${device.from.tablet} {
     margin-bottom: 0px;
@@ -133,9 +136,15 @@ const MoreOptions = styled.a`
   }
 `;
 
-const CookieBanner = ({ onAccept, onExit, toImpressumFunc, toPrivacyFunc }) => {
+const CookieBanner = ({
+  onAccept,
+  onExit,
+  impressumUrl,
+  privacyUrl,
+  onOpenSettings,
+}) => {
   const { t } = useTranslation();
-  
+
   return (
     <Container>
       <ImageWrapper>
@@ -167,11 +176,15 @@ const CookieBanner = ({ onAccept, onExit, toImpressumFunc, toPrivacyFunc }) => {
           </SolidButton>
         </ButtonsContainer>
         <Options>
-          <MoreOptions href="/cookies" style={{ display: 'none' }}>
-            {t('moreOptions')}
+          <MoreOptions type="button" onClick={onOpenSettings}>
+            {t('cookieSettings')}
           </MoreOptions>
-          <button onClick={toImpressumFunc}>{t('impressum')}</button>
-          <button onClick={toPrivacyFunc}>{t('dataPrivacy')}</button>
+          <a href={impressumUrl} target="_blank" rel="noopener noreferrer">
+            {t('impressum')}
+          </a>
+          <a href={privacyUrl} target="_blank" rel="noopener noreferrer">
+            {t('dataPrivacy')}
+          </a>
         </Options>
       </TextSection>
     </Container>

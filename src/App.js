@@ -4,12 +4,16 @@ import {
 } from '@a-little-world/little-world-design-system';
 import $ from 'jquery';
 import Cookies from 'js-cookie';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 import { BACKEND_URL } from './ENVIRONMENT';
 import CookieBanner from './components/CookieBanner';
+import CookieSettings from './components/CookieSettings';
 import OpenBannerButton from './components/OpenBannerButton';
-import { acceptAndInjectScripts } from './cookieTagInsertionLib';
+import {
+  acceptAndInjectScripts,
+  removeInjectedScripts,
+} from './cookieTagInsertionLib';
 import { indexCSS } from './styles';
 
 const SHOW_BANNER_COOKIE_NAME = 'cookieSelectionDone';
@@ -21,11 +25,27 @@ const buildConsentCookieValue = (states = {}) =>
     .map(([key, value]) => `${key}=${value}`)
     .join('|');
 
-const normalizeConsentCookieValue = value => (value || '').replace(/^"+|"+$/g, '');
+const normalizeConsentCookieValue = value =>
+  (value || '').replace(/^"+|"+$/g, '');
+
+const isAcceptedState = value =>
+  value !== undefined && value !== null && value !== '' && value !== '-1';
 
 const shouldBannerBeShown = () => {
   const cookieValue = Cookies.get(SHOW_BANNER_COOKIE_NAME);
   return cookieValue === undefined ? true : false;
+};
+
+const selectionDoneCookieOptions = () => {
+  const isProductionHost =
+    window.location.hostname.endsWith('little-world.com');
+  return {
+    domain: isProductionHost ? SHARED_COOKIE_DOMAIN : undefined,
+    expires: 30 /** cookie valid for 30 days then the cookie banner is shown again regardless */,
+    path: '/',
+    sameSite: 'Lax',
+    secure: window.location.protocol === 'https:',
+  };
 };
 
 const hasLegacyConsentSelection = () =>
@@ -36,11 +56,32 @@ function App({
   cookieSets,
   cookieStates,
   cookieConsentName = 'backend_cookie_consent',
-  toImpressumFunc,
-  toPrivacyFunc,
+  impressumUrl,
+  privacyUrl,
   cookieBannerIsHidden,
 }) {
   const styles = indexCSS; // All merged styles ( neeed to be included like this since we are using a shadow dom )
+
+  const normalizedGroups = useMemo(
+    () =>
+      (cookieGroups || []).map(group => ({
+        varname: group.fields.varname,
+        name: group.fields.name,
+        description: group.fields.description,
+        required: group.fields.is_required,
+      })),
+    [cookieGroups],
+  );
+
+  const buildPreferences = () => {
+    const next = {};
+    normalizedGroups.forEach(group => {
+      next[group.varname] = group.required
+        ? true
+        : isAcceptedState((cookieStates || {})[group.varname]);
+    });
+    return next;
+  };
 
   const hasStoredConsentSelection = () =>
     hasLegacyConsentSelection() ||
@@ -49,23 +90,23 @@ function App({
       cookieStates !== undefined &&
       Object.keys(cookieStates).length > 0);
 
-  const writeSelectionDoneCookie = () => {
-    Cookies.set(SHOW_BANNER_COOKIE_NAME, '1', {
-      domain: SHARED_COOKIE_DOMAIN,
-      expires: 30 /** cookie valid for 30 days then the cookie banner is shown again regardless */,
-      path: '/',
-      sameSite: 'Lax',
-      secure: window.location.protocol === 'https:',
-    });
-  };
-
   // Do not re-prompt users who already selected their cookies in a previous implementation.
   const [show, setShow] = useState(
     () => shouldBannerBeShown() && !hasStoredConsentSelection(),
   );
+  const [view, setView] = useState('banner');
+  const [preferences, setPreferences] = useState(buildPreferences);
+  const [saving, setSaving] = useState(false);
+  const [saveFailed, setSaveFailed] = useState(false);
+
+  const markSelectionDone = () => {
+    Cookies.set(SHOW_BANNER_COOKIE_NAME, '1', selectionDoneCookieOptions());
+  };
 
   const writeConsentCookie = () => {
-    const cookieValue = normalizeConsentCookieValue(buildConsentCookieValue(cookieStates));
+    const cookieValue = normalizeConsentCookieValue(
+      buildConsentCookieValue(cookieStates),
+    );
     const options = {
       domain: SHARED_COOKIE_DOMAIN,
       expires: 365,
@@ -80,8 +121,9 @@ function App({
   const cookieAcceptanceUpdate = (isAccepted, cookieVarName) => {
     $.ajax({
       type: 'POST',
-      url: `${BACKEND_URL}/cookies/${isAccepted ? 'accept' : 'decline'
-        }/${cookieVarName}/`,
+      url: `${BACKEND_URL}/cookies/${
+        isAccepted ? 'accept' : 'decline'
+      }/${cookieVarName}/`,
       crossDomain: true,
       xhrFields: {
         withCredentials: true,
@@ -113,6 +155,8 @@ function App({
 
     if (isAccepted) {
       acceptAndInjectScripts(group_id, cookieSets);
+    } else {
+      removeInjectedScripts(group_id);
     }
 
     writeConsentCookie();
@@ -138,7 +182,7 @@ function App({
 
   const onExit = () => {
     try {
-      writeSelectionDoneCookie();
+      markSelectionDone();
       declineAllNonEssentialCookies();
     } catch (e) {
       console.error('Failed to persist cookie decline', e);
@@ -149,7 +193,7 @@ function App({
 
   const onAccept = () => {
     try {
-      writeSelectionDoneCookie();
+      markSelectionDone();
       acceptAllNonEssentialCookies();
     } catch (e) {
       console.error('Failed to persist cookie acceptance', e);
@@ -158,11 +202,74 @@ function App({
     }
   };
 
+  const openSettings = () => {
+    setPreferences(buildPreferences());
+    setSaveFailed(false);
+    setView('settings');
+    setShow(true);
+  };
+
+  const handleToggle = (varname, value) => {
+    setSaveFailed(false);
+    setPreferences(current => ({ ...current, [varname]: value }));
+  };
+
+  const applyPreferences = next => {
+    normalizedGroups.forEach(group => {
+      if (group.required) return;
+      const desired = !!next[group.varname];
+      if (desired !== isAcceptedState((cookieStates || {})[group.varname])) {
+        cookieAcceptanceUpdate(desired, group.varname);
+      }
+    });
+    markSelectionDone();
+  };
+
+  const onSave = () => {
+    setSaving(true);
+    try {
+      applyPreferences(preferences);
+      setView('banner');
+      setShow(false);
+    } catch (e) {
+      setSaveFailed(true);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const onAcceptAll = () => {
+    const next = {};
+    normalizedGroups.forEach(group => {
+      next[group.varname] = true;
+    });
+    setPreferences(next);
+    applyPreferences(next);
+    setShow(false);
+    setView('banner');
+  };
+
+  const onDeclineAll = () => {
+    const next = {};
+    normalizedGroups.forEach(group => {
+      next[group.varname] = group.required;
+    });
+    setPreferences(next);
+    applyPreferences(next);
+    setShow(false);
+    setView('banner');
+  };
+
+  useEffect(() => {
+    // Allow the host page to open the settings view of this banner.
+    window.openCookieSettings = openSettings;
+  });
+
   useEffect(() => {
     // Users from the previous implementation already selected their cookies, so migrate
     // them to the current marker instead of prompting them again.
     if (shouldBannerBeShown() && hasStoredConsentSelection()) {
-      writeSelectionDoneCookie();
+      markSelectionDone();
     }
 
     // Ensure deprecated consent key is cleaned up everywhere.
@@ -174,9 +281,9 @@ function App({
 
     if (cookieStates === null || Object.keys(cookieStates).length === 0) {
       //Means we should determine the state our selfs
-      const current_accept_state =
-        Cookies.get(cookieConsentName) || '';
-      const normalized_accept_state = normalizeConsentCookieValue(current_accept_state);
+      const current_accept_state = Cookies.get(cookieConsentName) || '';
+      const normalized_accept_state =
+        normalizeConsentCookieValue(current_accept_state);
 
       if (current_accept_state !== normalized_accept_state) {
         Cookies.set(cookieConsentName, normalized_accept_state, {
@@ -219,13 +326,33 @@ function App({
       {cookieBannerIsHidden ? null : (
         <CustomThemeProvider>
           <style>{styles}</style>
-          <Modal open={show} onClose={() => setShow(false)} createInPortal={false} locked>
-            <CookieBanner
-              onExit={onExit}
-              onAccept={onAccept}
-              toImpressumFunc={toImpressumFunc}
-              toPrivacyFunc={toPrivacyFunc}
-            />
+          <Modal
+            open={show}
+            onClose={() => setShow(false)}
+            createInPortal={false}
+            locked
+          >
+            {view === 'settings' ? (
+              <CookieSettings
+                groups={normalizedGroups}
+                preferences={preferences}
+                onToggle={handleToggle}
+                onAcceptAll={onAcceptAll}
+                onDeclineAll={onDeclineAll}
+                onSave={onSave}
+                onBack={() => setView('banner')}
+                saving={saving}
+                saveFailed={saveFailed}
+              />
+            ) : (
+              <CookieBanner
+                onExit={onExit}
+                onAccept={onAccept}
+                impressumUrl={impressumUrl}
+                privacyUrl={privacyUrl}
+                onOpenSettings={openSettings}
+              />
+            )}
           </Modal>
           {!show && <OpenBannerButton onClick={() => setShow(true)} />}
         </CustomThemeProvider>

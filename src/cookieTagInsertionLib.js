@@ -20,31 +20,35 @@ export const addScriptToDom = (scriptString, id) => {
   document.head.appendChild(script);
 };
 
+const scriptId = (prefix, cookiePk, cookieGroup) =>
+  `${prefix}-cookie-${cookiePk}-group-${cookieGroup}`;
+
+export const removeInjectedScripts = cookieGroup => {
+  const groupSuffix = `-group-${cookieGroup}`;
+  document
+    .querySelectorAll(
+      `script[id^="src-cookie-"][id$="${groupSuffix}"], script[id^="script-cookie-"][id$="${groupSuffix}"]`,
+    )
+    .forEach(script => script.remove());
+};
+
 export const acceptAndInjectScripts = (cookieGroup, cookieSets) => {
   /**
    * This will load all script source ore tags for a specific cookieGroup
    * It will also check if the script id are present already and in that case would not add them again
    */
   cookieSets.forEach(cookie => {
-    if (cookie.fields.cookiegroup === cookieGroup) {
-      cookie.fields.include_srcs.forEach(s => {
-        const setId =
-          'src-cookie-' +
-          cookie.pk.toString() +
-          '-group-' +
-          cookieGroup.toString();
-        if (!document.getElementById(setId)) addScriptSrcToDom(s, setId);
-        else console.log('Element already present' + setId);
-      });
-      cookie.fields.include_scripts.forEach(s => {
-        const setId =
-          'script-cookie-' +
-          cookie.pk.toString() +
-          '-group-' +
-          cookieGroup.toString();
-        if (!document.getElementById(setId)) addScriptToDom(s, setId);
-        else console.log('Element already present' + setId);
-      });
-    }
+    if (cookie.fields.cookiegroup !== cookieGroup) return;
+
+    cookie.fields.include_srcs.forEach(src => {
+      const id = scriptId('src', cookie.pk, cookieGroup);
+      if (!document.getElementById(id)) addScriptSrcToDom(src, id);
+      else console.log('Element already present' + id);
+    });
+    cookie.fields.include_scripts.forEach(script => {
+      const id = scriptId('script', cookie.pk, cookieGroup);
+      if (!document.getElementById(id)) addScriptToDom(script, id);
+      else console.log('Element already present' + id);
+    });
   });
 };
